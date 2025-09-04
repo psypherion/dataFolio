@@ -1,0 +1,233 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Portfolio Config",
+  "type": "object",
+  "properties": {
+    "personalInfo": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "mediumProfile": { "type": "string" },
+        "githubProfile": { "type": "string" },
+        "updatedLabel": { "type": "string" },
+        "defaultTheme": { "type": "string", "enum": ["light", "dark"] }
+      },
+      "required": ["name", "title"],
+      "additionalProperties": false
+    },
+    "navigation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "minLength": 1 },
+          "href": { "type": "string" }
+        },
+        "required": ["label", "href"],
+        "additionalProperties": false
+      }
+    },
+    "sidebar": {
+      "type": "object",
+      "properties": {
+        "updates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": { "type": "string" },
+              "text": { "type": "string" }
+            },
+            "required": ["date", "text"],
+            "additionalProperties": false
+          }
+        },
+        "skillsSections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "items": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "required": ["title", "items"],
+            "additionalProperties": false
+          }
+        },
+        "quickLinks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "url": { "type": "string" }
+            },
+            "required": ["label", "url"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["updates", "skillsSections", "quickLinks"],
+      "additionalProperties": false
+    },
+    "projects": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/project" }
+    }
+  },
+  "required": ["personalInfo", "projects"],
+  "additionalProperties": false,
+  "definitions": {
+    "imageRef": {
+      "type": "object",
+      "properties": {
+        "src": { "type": "string" },
+        "alt": { "type": "string" }
+      },
+      "required": ["src", "alt"],
+      "additionalProperties": false
+    },
+    "thumbnailRef": {
+      "type": "object",
+      "properties": {
+        "src": { "type": "string" },
+        "fullSrc": { "type": "string" },
+        "alt": { "type": "string" }
+      },
+      "required": ["src", "fullSrc"],
+      "additionalProperties": false
+    },
+    "mediaTab": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "enum": ["video", "gallery", "diagram"] },
+        "content": { "type": "object" }
+      },
+      "required": ["id", "label", "type", "content"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "video" } } },
+          "then": {
+            "properties": {
+              "content": {
+                "type": "object",
+                "properties": {
+                  "videoId": { "type": "string", "minLength": 1 },
+                  "placeholder": { "type": "string" }
+                },
+                "required": ["videoId"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "gallery" } } },
+          "then": {
+            "properties": {
+              "content": {
+                "type": "object",
+                "properties": {
+                  "mainImage": { "$ref": "#/definitions/imageRef" },
+                  "thumbnails": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/thumbnailRef" },
+                    "minItems": 1
+                  }
+                },
+                "required": ["mainImage", "thumbnails"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "diagram" } } },
+          "then": {
+            "properties": {
+              "content": {
+                "type": "object",
+                "properties": {
+                  "src": { "type": "string", "minLength": 1 },
+                  "alt": { "type": "string" },
+                  "caption": { "type": "string" }
+                },
+                "required": ["src"],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "techSpecs": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["title", "items"],
+      "additionalProperties": false
+    },
+    "projectLinks": {
+      "type": "object",
+      "properties": {
+        "github": { "type": "string" },
+        "demo": { "type": "string" },
+        "paper": { "type": "string" },
+        "website": { "type": "string" }
+      },
+      "additionalProperties": { "type": "string" }
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "pattern": "^[a-zA-Z0-9-_]+$" },
+        "title": { "type": "string", "minLength": 1 },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "category": { "type": "string" },
+            "status": { "type": "string" },
+            "date": { "type": "string" }
+          },
+          "required": ["category", "status", "date"],
+          "additionalProperties": false
+        },
+        "summary": { "type": "string" },
+        "featured": { "type": "boolean" },
+        "media": {
+          "type": "object",
+          "properties": {
+            "tabs": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/mediaTab" },
+              "minItems": 1
+            }
+          },
+          "required": ["tabs"],
+          "additionalProperties": false
+        },
+        "techSpecs": { "$ref": "#/definitions/techSpecs" },
+        "content": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "links": { "$ref": "#/definitions/projectLinks" }
+      },
+      "required": ["id", "title", "meta", "summary", "content"],
+      "additionalProperties": false
+    }
+  }
+}

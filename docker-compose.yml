@@ -1,0 +1,12 @@
+services:
+  api:
+    build: .
+    container_name: portfolio-api
+    ports:
+      - "8000:8000"
+    environment:
+      - CONFIG_PATH=/app/data/projects-config.json
+    volumes:
+      - ./app:/app/app:rw
+      - ./dashboard:/app/dashboard:ro
+      - ./data:/app/data:rw

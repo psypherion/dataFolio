@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Portfolio Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lora:wght@400;500&family=Source+Code+Pro:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #F8F6F0;
+      --bg-secondary: #FFFFFF;
+      --text-primary: #2C2C2C;
+      --text-secondary: #666666;
+      --text-muted: #999999;
+      --accent: #CC0000;
+      --border: #DDDDDD;
+      --shadow: rgba(0,0,0,0.1);
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+    }
+    [data-theme="dark"] {
+      --bg-primary: #1A1A1A;
+      --bg-secondary: #2A2A2A;
+      --text-primary: #F8F6F0;
+      --text-secondary: #CCCCCC;
+      --text-muted: #888888;
+      --accent: #00BFFF;
+      --border: #444444;
+      --shadow: rgba(0,0,0,0.3);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Lora', serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+    header {
+      background: var(--bg-secondary);
+      border-bottom: 3px solid var(--text-primary);
+      padding: 16px 20px;
+      box-shadow: 0 2px 10px var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: .5px;
+    }
+    .subtitle {
+      color: var(--text-secondary);
+      font-style: italic;
+      font-size: .95rem;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    nav.tabs {
+      display: flex;
+      gap: 14px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 14px;
+      font-family: 'Lora', serif;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: .2s;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 600;
+    }
+    section.panel {
+      display: none;
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px var(--shadow);
+      margin-bottom: 18px;
+    }
+    section.panel.active { display: block; }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .row-auto { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; }
+
+    .form-group { margin-bottom: 14px; }
+    .label {
+      display: block;
+      font-family: 'Playfair Display', serif;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .input, .textarea, .select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Lora', serif;
+      font-size: 1rem;
+    }
+    .textarea { min-height: 100px; resize: vertical; }
+    .muted { color: var(--text-secondary); font-size: .9rem; }
+
+    .btn {
+      border: none;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-family: 'Lora', serif;
+      cursor: pointer;
+      transition: .2s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { filter: brightness(.9); }
+    .btn-secondary { background: var(--text-secondary); color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-warning { background: var(--warning); color: #000; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-ghost {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .list { display: grid; gap: 10px; margin-top: 10px; }
+    .card {
+      border: 1px solid var(--border);
+      background: var(--bg-primary);
+      padding: 12px;
+      border-radius: 6px;
+      display: grid;
+      gap: 6px;
+    }
+    .card-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .json-box {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 6px;
+      font-family: 'Source Code Pro', monospace;
+      font-size: .9rem;
+      white-space: pre-wrap;
+      overflow: auto;
+      max-height: 400px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: .75rem;
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+    }
+    .hint { color: var(--text-muted); font-size: .85rem; }
+
+    .divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+    /* Blog preview helpers */
+    .pill { display:inline-block; background:var(--bg-secondary); border:1px solid var(--border); padding:4px 8px; border-radius:999px; font-size:.8rem; margin-right:6px; }
+    .preview { display:flex; gap:12px; align-items:flex-start; }
+    .preview img { width:120px; height:80px; object-fit:cover; border:1px solid var(--border); border-radius:4px; }
+
+    @media (max-width: 900px) {
+      .row, .row-3, .row-auto { grid-template-columns: 1fr; }
+      nav.tabs { gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="title">Portfolio Dashboard</div>
+      <div class="subtitle">One source of truth → JSON → Your site</div>
+    </div>
+    <div class="actions">
+      <button id="btn-dark" class="btn btn-ghost">Toggle Theme</button>
+      <button id="btn-load-server" class="btn btn-ghost">Load From Server</button>
+      <button id="btn-save-draft" class="btn btn-secondary">Save Draft</button>
+      <button id="btn-publish" class="btn btn-success">Publish to Server</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="personal">Personal Info</button>
+      <button class="tab-btn" data-tab="projects">Projects</button>
+      <button class="tab-btn" data-tab="project-editor">Add/Edit Project</button>
+      <button class="tab-btn" data-tab="blog">Blog (Manual URLs)</button>
+      <button class="tab-btn" data-tab="sidebar">Sidebar</button>
+      <button class="tab-btn" data-tab="navigation">Navigation</button>
+      <button class="tab-btn" data-tab="json">JSON Manager</button>
+    </nav>
+
+    <!-- Personal Info -->
+    <section id="panel-personal" class="panel active">
+      <div class="row">
+        <div class="form-group">
+          <label class="label">Full Name</label>
+          <input id="pi-name" class="input" placeholder="Your Name">
+        </div>
+        <div class="form-group">
+          <label class="label">Professional Title</label>
+          <input id="pi-title" class="input" placeholder="AI Engineer • Systems Programmer • ML Researcher">
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label class="label">Medium Username</label>
+          <input id="pi-medium" class="input" placeholder="psypherion">
+          <div class="hint">Used to integrate Medium posts later (feed mode); manual URLs live in Blog tab below.</div>
+        </div>
+        <div class="form-group">
+          <label class="label">GitHub Username</label>
+          <input id="pi-github" class="input" placeholder="your-github">
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label class="label">Updated Label (e.g., Updated September 2025)</label>
+          <input id="pi-updated" class="input" placeholder="Updated September 2025">
+        </div>
+        <div class="form-group">
+          <label class="label">Default Theme</label>
+          <select id="pi-theme" class="select">
+            <option value="light">light</option>
+            <option value="dark">dark</option>
+          </select>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-save-personal">Save Personal Info</button>
+      </div>
+    </section>
+
+    <!-- Projects List -->
+    <section id="panel-projects" class="panel">
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Projects</strong> <span id="projects-count" class="badge">0</span></div>
+          <div class="actions">
+            <button class="btn btn-primary" id="btn-new-project">New Project</button>
+          </div>
+        </div>
+        <div id="projects-list" class="list"></div>
+      </div>
+    </section>
+
+    <!-- Project Editor -->
+    <section id="panel-project-editor" class="panel">
+      <div class="card">
+        <div class="card-row">
+          <div><strong id="pe-title">Add New Project</strong></div>
+          <div class="actions">
+            <button class="btn btn-primary" id="btn-save-project">Save Project</button>
+            <button class="btn btn-ghost" id="btn-clear-project">Clear</button>
+          </div>
+        </div>
+        <div class="divider"></div>
+
+        <div class="row">
+          <div class="form-group">
+            <label class="label">Project ID (URL-safe)</label>
+            <input id="pr-id" class="input" placeholder="mecnet">
+            <div class="hint">Only letters, numbers, hyphens, underscores.</div>
+          </div>
+          <div class="form-group">
+            <label class="label">Title</label>
+            <input id="pr-title" class="input" placeholder="MEC net - Continual Learning Language Model">
+          </div>
+        </div>
+
+        <div class="row-3">
+          <div class="form-group">
+            <label class="label">Category</label>
+            <input id="pr-category" class="input" placeholder="Research Project">
+          </div>
+          <div class="form-group">
+            <label class="label">Status</label>
+            <input id="pr-status" class="input" placeholder="In Development">
+          </div>
+          <div class="form-group">
+            <label class="label">Date</label>
+            <input id="pr-date" class="input" placeholder="August 2025">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="label">Summary</label>
+          <textarea id="pr-summary" class="textarea" placeholder="Brief project description..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="label">Featured</label>
+          <select id="pr-featured" class="select">
+            <option value="false">false</option>
+            <option value="true">true</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="card">
+          <div class="card-row">
+            <div><strong>Media Tabs</strong> <span id="media-count" class="badge">0</span></div>
+            <div class="actions">
+              <button class="btn btn-secondary" id="btn-add-media">Add Media Tab</button>
+            </div>
+          </div>
+          <div id="media-list" class="list"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row">
+          <div class="form-group">
+            <label class="label">Tech Specs Title</label>
+            <input id="pr-tech-title" class="input" placeholder="Technical Implementation">
+          </div>
+          <div class="form-group">
+            <label class="label">Tech Specs (one per line)</label>
+            <textarea id="pr-tech-items" class="textarea" placeholder="PyTorch, Transformers library&#10;Custom attention mechanisms"></textarea>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="label">Content Paragraphs (one per line)</label>
+          <textarea id="pr-content" class="textarea" placeholder="Paragraph 1...&#10;Paragraph 2..."></textarea>
+        </div>
+
+        <div class="row-3">
+          <div class="form-group">
+            <label class="label">GitHub URL</label>
+            <input id="pr-link-github" class="input" placeholder="https://github.com/..." />
+          </div>
+          <div class="form-group">
+            <label class="label">Demo URL</label>
+            <input id="pr-link-demo" class="input" placeholder="https://..." />
+          </div>
+          <div class="form-group">
+            <label class="label">Paper URL</label>
+            <input id="pr-link-paper" class="input" placeholder="https://arxiv.org/abs/..." />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Blog (Manual URLs) -->
+    <section id="panel-blog" class="panel">
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Blog (Manual URLs)</strong> <span id="blog-count" class="badge">0</span></div>
+          <div class="actions">
+            <button class="btn btn-secondary" id="btn-add-blog">Add URL</button>
+            <button class="btn btn-primary" id="btn-fetch-all">Fetch All & Normalize</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label class="label">Show on homepage</label>
+            <select id="blog-show" class="select">
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label">Cache TTL (minutes)</label>
+            <input id="blog-ttl" type="number" class="input" value="15" min="1">
+            <div class="hint">Server caches OG previews to avoid refetching on every edit.</div>
+          </div>
+        </div>
+
+        <div id="blog-list" class="list"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Normalized (Preview)</strong></div>
+          <div class="actions"><button class="btn btn-ghost" id="btn-clear-normalized">Clear Preview</button></div>
+        </div>
+        <div id="blog-normalized" class="list"></div>
+      </div>
+    </section>
+
+    <!-- Sidebar (Updates, Skills, Quick Links) -->
+    <section id="panel-sidebar" class="panel">
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Latest Updates</strong> <span id="upd-count" class="badge">0</span></div>
+          <div class="actions">
+            <button class="btn btn-secondary" id="btn-add-update">Add Update</button>
+          </div>
+        </div>
+        <div id="updates-list" class="list"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Skills Sections</strong> <span id="skills-count" class="badge">0</span></div>
+          <div class="actions">
+            <button class="btn btn-secondary" id="btn-add-skill-section">Add Skills Section</button>
+          </div>
+        </div>
+        <div id="skills-list" class="list"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Quick Links</strong> <span id="ql-count" class="badge">0</span></div>
+          <div class="actions">
+            <button class="btn btn-secondary" id="btn-add-ql">Add Link</button>
+          </div>
+        </div>
+        <div id="ql-list" class="list"></div>
+      </div>
+    </section>
+
+    <!-- Navigation -->
+    <section id="panel-navigation" class="panel">
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Navigation Items</strong> <span id="nav-count" class="badge">0</span></div>
+          <div class="actions">
+            <button class="btn btn-secondary" id="btn-add-nav">Add Nav Item</button>
+          </div>
+        </div>
+        <div id="nav-list" class="list"></div>
+      </div>
+    </section>
+
+    <!-- JSON Manager -->
+    <section id="panel-json" class="panel">
+      <div class="actions" style="margin-bottom:10px;">
+        <button class="btn btn-ghost" id="btn-generate-json">Generate JSON</button>
+        <button class="btn btn-primary" id="btn-download-json">Download JSON</button>
+        <input type="file" id="file-json" accept=".json" style="display:none;">
+        <button class="btn btn-warning" id="btn-upload-json">Import JSON</button>
+        <button class="btn btn-success" id="btn-validate-json">Validate (Client)</button>
+      </div>
+      <div id="json-preview" class="json-box">{"personalInfo":{}, "projects":[], "blog":{}}</div>
+      <div id="json-status" class="muted" style="margin-top:8px;"></div>
+    </section>
+  </div>
+
+  <script src="/dashboard/dashboard.js"></script>
+</body>
+</html>
