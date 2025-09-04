@@ -8,21 +8,53 @@ let state = {
     mediumProfile: "",
     githubProfile: "",
     updatedLabel: "",
-    defaultTheme: "light"
+    defaultTheme: "light",
+  },
+  about: {
+    tagline: "",
+    bio: "",
+    photo: { src: "", alt: "" },
+    cta: { label: "", url: "" },
+    personJSONLD: true,
   },
   navigation: [],
   sidebar: {
     updates: [],
     skillsSections: [],
-    quickLinks: []
+    quickLinks: [],
   },
   projects: [],
+  openSource: [],
+  academics: {
+    education: [],
+    exams: [],
+    internships: [],
+  },
   blog: {
     showOnHomepage: true,
     mode: "manual",
     cacheMinutes: 15,
     manualPosts: [],
-    normalized: []
+    normalized: [],
+    taxonomy: {
+      categories: [],
+      tagSuggestions: [],
+      series: [] // [{id,title,items:[url,...]}]
+    }
+  },
+  settings: {
+    accessibility: {
+      skipLinkLabel: "Skip to content",
+      forceFocusVisible: true,
+      minContrastAA: true,
+      requireCaptions: false,
+    },
+    performance: {
+      lazyLoadImagesDefault: true,
+      responsiveImagesDefault: true,
+      maxImageWidth: 2560,
+      deferNonCriticalJS: true,
+    }
   }
 };
 
@@ -56,27 +88,27 @@ function toast(text, type = "info") {
   });
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 2500);
-} [6]
+}
 
 function sanitizeId(id) {
   return (id || "").toString().trim().toLowerCase().replace(/[^a-z0-9-_]/g, "-");
-} [6]
+}
 
 function linesToArray(textareaValue) {
   return (textareaValue || "")
     .split("\n")
     .map((s) => s.trim())
     .filter(Boolean);
-} [6]
+}
 
 function arrayToLines(arr) {
   return (arr || []).join("\n");
-} [6]
+}
 
 function saveDraft() {
   localStorage.setItem("portfolioDataDraft", JSON.stringify(state));
   toast("Draft saved locally", "success");
-} [6]
+}
 
 function loadDraft() {
   const raw = localStorage.getItem("portfolioDataDraft");
@@ -87,10 +119,10 @@ function loadDraft() {
   } catch {
     return false;
   }
-} [6]
+}
 
 async function loadFromServer() {
-  const res = await fetch("/api/config");
+  const res = await fetch("/api/config", { cache: "no-store" });
   if (!res.ok) {
     toast("Failed to load from server", "error");
     return;
@@ -98,7 +130,7 @@ async function loadFromServer() {
   state = await res.json();
   toast("Loaded from server", "success");
   renderAll();
-} [6]
+}
 
 async function publishToServer() {
   const payload = { data: toJSON() };
@@ -113,12 +145,12 @@ async function publishToServer() {
     const detail = await res.json().catch(() => ({}));
     toast(`Publish failed: ${(detail && detail.detail) || res.statusText}`, "error");
   }
-} [6]
+}
 
 function toJSON() {
   // Return a deep copy to avoid mutations
   return JSON.parse(JSON.stringify(state));
-} [6]
+}
 
 function setTheme(theme) {
   if (theme === "dark") {
@@ -126,7 +158,7 @@ function setTheme(theme) {
   } else {
     document.body.removeAttribute("data-theme");
   }
-} [6]
+}
 
 // ---------------- Tabs ----------------
 function setupTabs() {
@@ -136,10 +168,11 @@ function setupTabs() {
       btn.classList.add("active");
       const key = btn.dataset.tab;
       $$(".panel").forEach((p) => p.classList.remove("active"));
-      $(`#panel-${key}`).classList.add("active");
+      const panel = document.getElementById(`panel-${key}`);
+      if (panel) panel.classList.add("active");
     });
   });
-} [6]
+}
 
 // ---------------- Personal Info ----------------
 function bindPersonalInfo() {
@@ -161,7 +194,7 @@ function bindPersonalInfo() {
     $("#pi-theme").value = newTheme;
     setTheme(newTheme);
   });
-} [6]
+}
 
 function renderPersonalInfo() {
   $("#pi-name").value = state.personalInfo.name || "";
@@ -171,12 +204,45 @@ function renderPersonalInfo() {
   $("#pi-updated").value = state.personalInfo.updatedLabel || "";
   $("#pi-theme").value = state.personalInfo.defaultTheme || "light";
   setTheme(state.personalInfo.defaultTheme || "light");
-} [6]
+}
+
+// ---------------- About ----------------
+function bindAbout() {
+  const btn = $("#btn-save-about");
+  if (!btn) return;
+  btn.onclick = () => {
+    state.about.tagline = $("#about-tagline").value.trim();
+    state.about.bio = $("#about-bio").value.trim();
+    state.about.photo = {
+      src: $("#about-photo-src").value.trim(),
+      alt: $("#about-photo-alt").value.trim(),
+    };
+    state.about.cta = {
+      label: $("#about-cta-label").value.trim(),
+      url: $("#about-cta-url").value.trim(),
+    };
+    state.about.personJSONLD = $("#about-jsonld").value === "true";
+    saveDraft();
+    toast("About saved", "success");
+  };
+}
+
+function renderAbout() {
+  if (!$("#panel-about")) return;
+  $("#about-tagline").value = state.about.tagline || "";
+  $("#about-bio").value = state.about.bio || "";
+  $("#about-photo-src").value = state.about.photo?.src || "";
+  $("#about-photo-alt").value = state.about.photo?.alt || "";
+  $("#about-cta-label").value = state.about.cta?.label || "";
+  $("#about-cta-url").value = state.about.cta?.url || "";
+  $("#about-jsonld").value = state.about.personJSONLD ? "true" : "false";
+}
 
 // ---------------- Projects List ----------------
 function renderProjectsList() {
   $("#projects-count").textContent = (state.projects || []).length;
   const list = $("#projects-list");
+  if (!list) return;
   list.innerHTML = "";
 
   (state.projects || []).forEach((p, idx) => {
@@ -185,7 +251,7 @@ function renderProjectsList() {
     item.innerHTML = `
       <div class="card-row">
         <div>
-          <strong>${p.title}</strong> ${p.featured ? "<span class='badge'>FEATURED</span>" : ""}
+          <strong>${p.title || ""}</strong> ${p.featured ? "<span class='badge'>FEATURED</span>" : ""}
           <div class="muted">${p.meta?.category || ""} • ${p.meta?.status || ""} • ${p.meta?.date || ""}</div>
         </div>
         <div class="actions">
@@ -201,12 +267,15 @@ function renderProjectsList() {
     list.appendChild(item);
   });
 
-  $("#btn-new-project").onclick = () => {
-    editIndex = null;
-    clearProjectForm();
-    $(".tab-btn[data-tab='project-editor']").click();
-  };
-} [6]
+  const newBtn = $("#btn-new-project");
+  if (newBtn) {
+    newBtn.onclick = () => {
+      editIndex = null;
+      clearProjectForm();
+      $(".tab-btn[data-tab='project-editor']").click();
+    };
+  }
+}
 
 // ---------------- Project Editor ----------------
 function clearProjectForm() {
@@ -226,7 +295,15 @@ function clearProjectForm() {
   $("#pr-link-github").value = "";
   $("#pr-link-demo").value = "";
   $("#pr-link-paper").value = "";
-} [6]
+
+  // Case study fields
+  $("#pr-role").value = "";
+  $("#pr-resp").value = "";
+  $("#pr-problem").value = "";
+  $("#pr-approach").value = "";
+  $("#pr-impact").value = "";
+  $("#pr-outcomes").value = "";
+}
 
 function editProject(idx) {
   editIndex = idx;
@@ -258,17 +335,25 @@ function editProject(idx) {
   $("#pr-link-github").value = p.links?.github || "";
   $("#pr-link-demo").value = p.links?.demo || "";
   $("#pr-link-paper").value = p.links?.paper || "";
-} [6]
+
+  // Case study
+  $("#pr-role").value = p.caseStudy?.role || "";
+  $("#pr-resp").value = (p.caseStudy?.responsibilities || []).join(", ");
+  $("#pr-problem").value = p.caseStudy?.problem || "";
+  $("#pr-approach").value = p.caseStudy?.approach || "";
+  $("#pr-impact").value = p.caseStudy?.impact || "";
+  $("#pr-outcomes").value = arrayToLines(p.caseStudy?.outcomes || []);
+}
 
 function duplicateProject(idx) {
   const p = JSON.parse(JSON.stringify(state.projects[idx]));
-  p.id = sanitizeId(p.id + "-copy");
-  p.title = p.title + " (Copy)";
+  p.id = sanitizeId((p.id || "project") + "-copy");
+  p.title = (p.title || "Untitled") + " (Copy)";
   state.projects.push(p);
   renderProjectsList();
   saveDraft();
   toast("Project duplicated", "success");
-} [6]
+}
 
 function deleteProject(idx) {
   if (!confirm("Delete this project?")) return;
@@ -276,7 +361,7 @@ function deleteProject(idx) {
   renderProjectsList();
   saveDraft();
   toast("Project deleted", "success");
-} [6]
+}
 
 function collectProjectFromForm() {
   const id = sanitizeId($("#pr-id").value);
@@ -349,49 +434,81 @@ function collectProjectFromForm() {
   if ($("#pr-link-paper").value.trim())
     links.paper = $("#pr-link-paper").value.trim();
 
+  // Case study
+  const caseStudy = {
+    role: $("#pr-role").value.trim(),
+    responsibilities: ($("#pr-resp").value || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
+    problem: $("#pr-problem").value.trim(),
+    approach: $("#pr-approach").value.trim(),
+    impact: $("#pr-impact").value.trim(),
+    outcomes: linesToArray($("#pr-outcomes").value),
+  };
+
   const project = { id, title, meta, summary, featured, content };
   if (tabs.length) project.media = { tabs };
-  if (techSpecs.title || techSpecs.items?.length) project.techSpecs = techSpecs;
+  if (techSpecs.title || (techSpecs.items && techSpecs.items.length)) project.techSpecs = techSpecs;
   if (Object.keys(links).length) project.links = links;
+  if (
+    caseStudy.role ||
+    caseStudy.problem ||
+    caseStudy.approach ||
+    caseStudy.impact ||
+    (caseStudy.outcomes && caseStudy.outcomes.length) ||
+    (caseStudy.responsibilities && caseStudy.responsibilities.length)
+  ) {
+    project.caseStudy = caseStudy;
+  }
 
   return project;
-} [6]
+}
 
 function bindProjectEditor() {
-  $("#btn-clear-project").onclick = clearProjectForm;
+  const clearBtn = $("#btn-clear-project");
+  if (clearBtn) clearBtn.onclick = clearProjectForm;
 
-  $("#btn-save-project").onclick = () => {
-    const project = collectProjectFromForm();
-    if (!project.id || !project.title) {
-      toast("ID and Title are required", "error");
-      return;
-    }
-    if (editIndex === null) {
-      state.projects.unshift(project);
-    } else {
-      state.projects[editIndex] = project;
-    }
-    editIndex = null;
-    clearProjectForm();
-    renderProjectsList();
-    saveDraft();
-    toast("Project saved", "success");
-  };
+  const saveBtn = $("#btn-save-project");
+  if (saveBtn) {
+    saveBtn.onclick = () => {
+      const project = collectProjectFromForm();
+      if (!project.id || !project.title) {
+        toast("ID and Title are required", "error");
+        return;
+      }
+      if (editIndex === null) {
+        state.projects.unshift(project);
+      } else {
+        state.projects[editIndex] = project;
+      }
+      editIndex = null;
+      clearProjectForm();
+      renderProjectsList();
+      saveDraft();
+      toast("Project saved", "success");
+    };
+  }
 
-  $("#btn-add-media").onclick = () => {
-    addMediaFormFromData({
-      id: "",
-      label: "",
-      type: "video",
-      content: { videoId: "", placeholder: "" },
-    });
-    updateMediaCount();
-  };
-} [6]
+  const addMediaBtn = $("#btn-add-media");
+  if (addMediaBtn) {
+    addMediaBtn.onclick = () => {
+      addMediaFormFromData({
+        id: "",
+        label: "",
+        type: "video",
+        content: { videoId: "", placeholder: "" },
+      });
+      updateMediaCount();
+    };
+  }
+}
 
 function updateMediaCount() {
-  $("#media-count").textContent = $$("#media-list .card").length;
-} [6]
+  const count = $$("#media-list .card").length;
+  const badge = $("#media-count");
+  if (badge) badge.textContent = count.toString();
+}
 
 function addMediaFormFromData(tab) {
   const wrap = document.createElement("div");
@@ -507,20 +624,36 @@ function addMediaFormFromData(tab) {
   }
 
   renderType(typeSel.value, tab);
-
   typeSel.addEventListener("change", () => renderType(typeSel.value, {}));
   wrap.querySelector(".btn-remove-media").onclick = () => {
     wrap.remove();
     updateMediaCount();
   };
   $("#media-list").appendChild(wrap);
-} [6]
+}
 
-// ---------------- Blog (Manual URLs) ----------------
+// ---------------- Blog (Manual URLs + Taxonomy) ----------------
 function renderBlog() {
+  if (!$("#panel-blog")) return;
+
   $("#blog-count").textContent = (state.blog.manualPosts || []).length;
   $("#blog-show").value = state.blog.showOnHomepage ? "true" : "false";
   $("#blog-ttl").value = state.blog.cacheMinutes || 15;
+
+  // Taxonomy textareas
+  if ($("#blog-categories")) {
+    $("#blog-categories").value = arrayToLines(state.blog.taxonomy?.categories || []);
+  }
+  if ($("#blog-tag-suggestions")) {
+    $("#blog-tag-suggestions").value = arrayToLines(state.blog.taxonomy?.tagSuggestions || []);
+  }
+  if ($("#blog-series-json")) {
+    try {
+      $("#blog-series-json").value = JSON.stringify(state.blog.taxonomy?.series || [], null, 2);
+    } catch {
+      $("#blog-series-json").value = "[]";
+    }
+  }
 
   const list = $("#blog-list");
   list.innerHTML = "";
@@ -536,7 +669,7 @@ function renderBlog() {
         </div>
         <div class="form-group">
           <label class="label">Category</label>
-          <input class="input blog-cat" value="${b.category || ""}" placeholder="philosophy / tutorials / reviews / thoughts">
+          <input class="input blog-cat" value="${b.category || ""}" placeholder="philosophy / reviews / psychology / general">
         </div>
       </div>
       <div class="row">
@@ -641,10 +774,38 @@ function renderBlog() {
     state.blog.showOnHomepage = $("#blog-show").value === "true";
     saveDraft();
   };
-} [1]
+
+  // Taxonomy bindings
+  if ($("#blog-categories")) {
+    $("#blog-categories").oninput = () => {
+      state.blog.taxonomy.categories = linesToArray($("#blog-categories").value);
+      saveDraft();
+    };
+  }
+  if ($("#blog-tag-suggestions")) {
+    $("#blog-tag-suggestions").oninput = () => {
+      state.blog.taxonomy.tagSuggestions = linesToArray($("#blog-tag-suggestions").value);
+      saveDraft();
+    };
+  }
+  if ($("#blog-series-json")) {
+    $("#blog-series-json").oninput = () => {
+      try {
+        const val = JSON.parse($("#blog-series-json").value || "[]");
+        if (Array.isArray(val)) {
+          state.blog.taxonomy.series = val;
+          saveDraft();
+        }
+      } catch {
+        // ignore invalid JSON until corrected
+      }
+    };
+  }
+}
 
 function renderNormalized() {
   const list = $("#blog-normalized");
+  if (!list) return;
   list.innerHTML = "";
   (state.blog.normalized || []).forEach((n) => {
     const card = document.createElement("div");
@@ -653,26 +814,50 @@ function renderNormalized() {
       <div class="preview">
         ${n.image ? `<img src="${n.image}" alt="">` : ""}
         <div>
-          <div><strong>${n.title}</strong> ${n.pinned ? `<span class="badge">PINNED</span>` : ""}</div>
+          <div><strong>${n.title || ""}</strong> ${n.pinned ? `<span class="badge">PINNED</span>` : ""}</div>
           <div class="muted">${n.date || ""} • ${n.readMinutes || 1} min • ${n.category || ""}</div>
           <div>${(n.summary || "").slice(0, 240)}${(n.summary || "").length > 240 ? "..." : ""}</div>
           <div class="muted">${(n.tags || []).map((t) => `<span class="pill">${t}</span>`).join(" ")}</div>
-          <div class="muted">${n.url}</div>
+          <div class="muted">${n.url || ""}</div>
         </div>
       </div>
     `;
     list.appendChild(card);
   });
 
-  $("#btn-clear-normalized").onclick = () => {
-    state.blog.normalized = [];
-    renderNormalized();
-    saveDraft();
-  };
-} [1]
+  const clearBtn = $("#btn-clear-normalized");
+  if (clearBtn) {
+    clearBtn.onclick = () => {
+      state.blog.normalized = [];
+      renderNormalized();
+      saveDraft();
+    };
+  }
+}
+
+function collectBlogRowsIntoState() {
+  const cards = Array.from(document.querySelectorAll("#blog-list .card"));
+  state.blog.manualPosts = cards.map((card) => {
+    const url = card.querySelector(".blog-url")?.value.trim() || "";
+    const category = card.querySelector(".blog-cat")?.value.trim() || "";
+    const pinned = (card.querySelector(".blog-pinned")?.value || "false") === "true";
+    const overrides = {
+      title: card.querySelector(".ov-title")?.value.trim() || "",
+      summary: card.querySelector(".ov-summary")?.value.trim() || "",
+      image: card.querySelector(".ov-image")?.value.trim() || "",
+      date: card.querySelector(".ov-date")?.value.trim() || "",
+    };
+    return { url, category, pinned, overrides };
+  });
+}
 
 function bindBlog() {
-  $("#btn-fetch-all").onclick = async () => {
+  const fetchAllBtn = $("#btn-fetch-all");
+  if (!fetchAllBtn) return;
+  fetchAllBtn.onclick = async () => {
+    // Ensure typed values are captured even if row "Save" wasn't clicked
+    collectBlogRowsIntoState();
+
     const urls = (state.blog.manualPosts || []).map((p) => p.url).filter(Boolean);
     if (!urls.length) {
       toast("No URLs to fetch", "warn");
@@ -705,12 +890,13 @@ function bindBlog() {
       toast("Failed to normalize", "error");
     }
   };
-} [1]
+}
 
 // ---------------- Sidebar: Updates, Skills, Quick Links ----------------
 function renderUpdates() {
   $("#upd-count").textContent = (state.sidebar.updates || []).length;
   const list = $("#updates-list");
+  if (!list) return;
   list.innerHTML = "";
   (state.sidebar.updates || []).forEach((u, idx) => {
     const card = document.createElement("div");
@@ -750,16 +936,20 @@ function renderUpdates() {
     list.appendChild(card);
   });
 
-  $("#btn-add-update").onclick = () => {
-    state.sidebar.updates.unshift({ date: "", text: "" });
-    renderUpdates();
-    saveDraft();
-  };
-} [6]
+  const addBtn = $("#btn-add-update");
+  if (addBtn) {
+    addBtn.onclick = () => {
+      state.sidebar.updates.unshift({ date: "", text: "" });
+      renderUpdates();
+      saveDraft();
+    };
+  }
+}
 
 function renderSkills() {
   $("#skills-count").textContent = (state.sidebar.skillsSections || []).length;
   const list = $("#skills-list");
+  if (!list) return;
   list.innerHTML = "";
   (state.sidebar.skillsSections || []).forEach((s, idx) => {
     const card = document.createElement("div");
@@ -796,16 +986,20 @@ function renderSkills() {
     list.appendChild(card);
   });
 
-  $("#btn-add-skill-section").onclick = () => {
-    state.sidebar.skillsSections.push({ title: "", items: [] });
-    renderSkills();
-    saveDraft();
-  };
-} [6]
+  const addBtn = $("#btn-add-skill-section");
+  if (addBtn) {
+    addBtn.onclick = () => {
+      state.sidebar.skillsSections.push({ title: "", items: [] });
+      renderSkills();
+      saveDraft();
+    };
+  }
+}
 
 function renderQuickLinks() {
   $("#ql-count").textContent = (state.sidebar.quickLinks || []).length;
   const list = $("#ql-list");
+  if (!list) return;
   list.innerHTML = "";
   (state.sidebar.quickLinks || []).forEach((q, idx) => {
     const card = document.createElement("div");
@@ -845,17 +1039,21 @@ function renderQuickLinks() {
     list.appendChild(card);
   });
 
-  $("#btn-add-ql").onclick = () => {
-    state.sidebar.quickLinks.push({ label: "", url: "" });
-    renderQuickLinks();
-    saveDraft();
-  };
-} [6]
+  const addBtn = $("#btn-add-ql");
+  if (addBtn) {
+    addBtn.onclick = () => {
+      state.sidebar.quickLinks.push({ label: "", url: "" });
+      renderQuickLinks();
+      saveDraft();
+    };
+  }
+}
 
 // ---------------- Navigation ----------------
 function renderNavigation() {
   $("#nav-count").textContent = (state.navigation || []).length;
   const list = $("#nav-list");
+  if (!list) return;
   list.innerHTML = "";
   (state.navigation || []).forEach((n, idx) => {
     const card = document.createElement("div");
@@ -895,12 +1093,295 @@ function renderNavigation() {
     list.appendChild(card);
   });
 
-  $("#btn-add-nav").onclick = () => {
-    state.navigation.push({ label: "", href: "#" });
-    renderNavigation();
-    saveDraft();
-  };
-} [6]
+  const addBtn = $("#btn-add-nav");
+  if (addBtn) {
+    addBtn.onclick = () => {
+      state.navigation.push({ label: "", href: "#" });
+      renderNavigation();
+      saveDraft();
+    };
+  }
+}
+
+// ---------------- Open Source ----------------
+function renderOpenSource() {
+  const list = $("#oss-list");
+  if (!list) return;
+  $("#oss-count").textContent = (state.openSource || []).length;
+  list.innerHTML = "";
+  (state.openSource || []).forEach((o, idx) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="row-4">
+        <div class="form-group"><label class="label">Name</label><input class="input oss-name" value="${o.name || ""}"></div>
+        <div class="form-group"><label class="label">Repo URL</label><input class="input oss-repo" value="${o.repoUrl || ""}"></div>
+        <div class="form-group"><label class="label">Demo URL</label><input class="input oss-demo" value="${o.demoUrl || ""}"></div>
+        <div class="form-group"><label class="label">License</label><input class="input oss-license" value="${o.license || ""}"></div>
+      </div>
+      <div class="row">
+        <div class="form-group"><label class="label">Blurb</label><textarea class="textarea oss-blurb">${o.blurb || ""}</textarea></div>
+        <div class="form-group"><label class="label">Good First Issues URL</label><input class="input oss-gfi" value="${o.goodFirstIssuesUrl || ""}"></div>
+      </div>
+      <div class="form-group">
+        <label class="label">Tags (one per line)</label>
+        <textarea class="textarea oss-tags">${arrayToLines(o.tags || [])}</textarea>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost oss-save">Save</button>
+        <button class="btn btn-danger oss-del">Delete</button>
+      </div>
+    `;
+    card.querySelector(".oss-save").onclick = () => {
+      const name = card.querySelector(".oss-name").value.trim();
+      const repoUrl = card.querySelector(".oss-repo").value.trim();
+      const demoUrl = card.querySelector(".oss-demo").value.trim();
+      const license = card.querySelector(".oss-license").value.trim();
+      const blurb = card.querySelector(".oss-blurb").value.trim();
+      const goodFirstIssuesUrl = card.querySelector(".oss-gfi").value.trim();
+      const tags = linesToArray(card.querySelector(".oss-tags").value);
+      state.openSource[idx] = { name, repoUrl, demoUrl, license, blurb, goodFirstIssuesUrl, tags };
+      saveDraft();
+      toast("Open source saved", "success");
+    };
+    card.querySelector(".oss-del").onclick = () => {
+      state.openSource.splice(idx, 1);
+      renderOpenSource();
+      saveDraft();
+      toast("Open source deleted", "success");
+    };
+    list.appendChild(card);
+  });
+
+  const addBtn = $("#btn-add-oss");
+  if (addBtn) {
+    addBtn.onclick = () => {
+      state.openSource.unshift({ name: "", repoUrl: "", demoUrl: "", license: "", blurb: "", goodFirstIssuesUrl: "", tags: [] });
+      renderOpenSource();
+      saveDraft();
+    };
+  }
+}
+
+// ---------------- Academics ----------------
+function renderAcademics() {
+  // Education
+  const eduList = $("#edu-list");
+  if (eduList) {
+    $("#edu-count").textContent = (state.academics.education || []).length;
+    eduList.innerHTML = "";
+    (state.academics.education || []).forEach((e, idx) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="row-4">
+          <div class="form-group"><label class="label">Level</label><input class="input edu-level" value="${e.level || ""}" placeholder="secondary/higherSecondary/bachelors/masters"></div>
+          <div class="form-group"><label class="label">Institution</label><input class="input edu-inst" value="${e.institution || ""}"></div>
+          <div class="form-group"><label class="label">Board/University</label><input class="input edu-board" value="${e.board || ""}"></div>
+          <div class="form-group"><label class="label">Location</label><input class="input edu-loc" value="${e.location || ""}"></div>
+        </div>
+        <div class="row-4">
+          <div class="form-group"><label class="label">Start</label><input class="input edu-start" value="${e.start || ""}" placeholder="YYYY or YYYY-MM"></div>
+          <div class="form-group"><label class="label">End</label><input class="input edu-end" value="${e.end || ""}"></div>
+          <div class="form-group"><label class="label">GPA/Percentage</label><input class="input edu-grade" value="${e.grade || ""}"></div>
+          <div class="form-group"><label class="label">Honors</label><input class="input edu-honors" value="${e.honors || ""}"></div>
+        </div>
+        <div class="form-group">
+          <label class="label">Key Coursework (one per line)</label>
+          <textarea class="textarea edu-courses">${arrayToLines(e.coursework || [])}</textarea>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost edu-save">Save</button>
+          <button class="btn btn-danger edu-del">Delete</button>
+        </div>
+      `;
+      card.querySelector(".edu-save").onclick = () => {
+        const level = card.querySelector(".edu-level").value.trim();
+        const institution = card.querySelector(".edu-inst").value.trim();
+        const board = card.querySelector(".edu-board").value.trim();
+        const location = card.querySelector(".edu-loc").value.trim();
+        const start = card.querySelector(".edu-start").value.trim();
+        const end = card.querySelector(".edu-end").value.trim();
+        const grade = card.querySelector(".edu-grade").value.trim();
+        const honors = card.querySelector(".edu-honors").value.trim();
+        const coursework = linesToArray(card.querySelector(".edu-courses").value);
+        state.academics.education[idx] = { level, institution, board, location, start, end, grade, honors, coursework };
+        saveDraft();
+        toast("Education saved", "success");
+      };
+      card.querySelector(".edu-del").onclick = () => {
+        state.academics.education.splice(idx, 1);
+        renderAcademics();
+        saveDraft();
+        toast("Education deleted", "success");
+      };
+      eduList.appendChild(card);
+    });
+
+    const addEdu = $("#btn-add-edu");
+    if (addEdu) {
+      addEdu.onclick = () => {
+        state.academics.education.unshift({ level: "", institution: "", board: "", location: "", start: "", end: "", grade: "", honors: "", coursework: [] });
+        renderAcademics();
+        saveDraft();
+      };
+    }
+  }
+
+  // Exams
+  const examList = $("#exam-list");
+  if (examList) {
+    $("#exam-count").textContent = (state.academics.exams || []).length;
+    examList.innerHTML = "";
+    (state.academics.exams || []).forEach((x, idx) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="row-4">
+          <div class="form-group"><label class="label">Name</label><input class="input ex-name" value="${x.name || ""}" placeholder="UGC-NET"></div>
+          <div class="form-group"><label class="label">Subject</label><input class="input ex-sub" value="${x.subject || ""}"></div>
+          <div class="form-group"><label class="label">Authority</label><input class="input ex-auth" value="${x.authority || ""}"></div>
+          <div class="form-group"><label class="label">Year</label><input class="input ex-year" value="${x.year || ""}"></div>
+        </div>
+        <div class="row-4">
+          <div class="form-group"><label class="label">Score</label><input class="input ex-score" value="${x.score || ""}"></div>
+          <div class="form-group"><label class="label">Percentile</label><input class="input ex-perc" value="${x.percentile || ""}"></div>
+          <div class="form-group"><label class="label">Rank</label><input class="input ex-rank" value="${x.rank || ""}"></div>
+          <div class="form-group"><label class="label">Certificate URL</label><input class="input ex-cert" value="${x.certificateUrl || ""}"></div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost ex-save">Save</button>
+          <button class="btn btn-danger ex-del">Delete</button>
+        </div>
+      `;
+      card.querySelector(".ex-save").onclick = () => {
+        const name = card.querySelector(".ex-name").value.trim();
+        const subject = card.querySelector(".ex-sub").value.trim();
+        const authority = card.querySelector(".ex-auth").value.trim();
+        const year = card.querySelector(".ex-year").value.trim();
+        const score = card.querySelector(".ex-score").value.trim();
+        const percentile = card.querySelector(".ex-perc").value.trim();
+        const rank = card.querySelector(".ex-rank").value.trim();
+        const certificateUrl = card.querySelector(".ex-cert").value.trim();
+        state.academics.exams[idx] = { name, subject, authority, year, score, percentile, rank, certificateUrl };
+        saveDraft();
+        toast("Exam saved", "success");
+      };
+      card.querySelector(".ex-del").onclick = () => {
+        state.academics.exams.splice(idx, 1);
+        renderAcademics();
+        saveDraft();
+        toast("Exam deleted", "success");
+      };
+      examList.appendChild(card);
+    });
+
+    const addExam = $("#btn-add-exam");
+    if (addExam) {
+      addExam.onclick = () => {
+        state.academics.exams.unshift({
+          name: "", subject: "", authority: "", year: "",
+          score: "", percentile: "", rank: "", certificateUrl: ""
+        });
+        renderAcademics();
+        saveDraft();
+      };
+    }
+  }
+
+  // Internships
+  const intList = $("#int-list");
+  if (intList) {
+    $("#int-count").textContent = (state.academics.internships || []).length;
+    intList.innerHTML = "";
+    (state.academics.internships || []).forEach((it, idx) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="row-4">
+          <div class="form-group"><label class="label">Organization</label><input class="input in-org" value="${it.org || ""}"></div>
+          <div class="form-group"><label class="label">Title</label><input class="input in-title" value="${it.title || ""}"></div>
+          <div class="form-group"><label class="label">Team</label><input class="input in-team" value="${it.team || ""}"></div>
+          <div class="form-group"><label class="label">Location</label><input class="input in-loc" value="${it.location || ""}"></div>
+        </div>
+        <div class="row-4">
+          <div class="form-group"><label class="label">Start</label><input class="input in-start" value="${it.start || ""}" placeholder="YYYY or YYYY-MM"></div>
+          <div class="form-group"><label class="label">End</label><input class="input in-end" value="${it.end || ""}"></div>
+          <div class="form-group"><label class="label">Proof URL</label><input class="input in-proof" value="${it.proofUrl || ""}"></div>
+          <div class="form-group"><label class="label">Contact (optional)</label><input class="input in-contact" value="${it.contact || ""}" placeholder="supervisor@email"></div>
+        </div>
+        <div class="row">
+          <div class="form-group"><label class="label">Impact Bullets (one per line)</label><textarea class="textarea in-bullets">${arrayToLines(it.bullets || [])}</textarea></div>
+          <div class="form-group"><label class="label">Tech (one per line)</label><textarea class="textarea in-tech">${arrayToLines(it.tech || [])}</textarea></div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost in-save">Save</button>
+          <button class="btn btn-danger in-del">Delete</button>
+        </div>
+      `;
+      card.querySelector(".in-save").onclick = () => {
+        const org = card.querySelector(".in-org").value.trim();
+        const title = card.querySelector(".in-title").value.trim();
+        const team = card.querySelector(".in-team").value.trim();
+        const location = card.querySelector(".in-loc").value.trim();
+        const start = card.querySelector(".in-start").value.trim();
+        const end = card.querySelector(".in-end").value.trim();
+        const proofUrl = card.querySelector(".in-proof").value.trim();
+        const contact = card.querySelector(".in-contact").value.trim();
+        const bullets = linesToArray(card.querySelector(".in-bullets").value);
+        const tech = linesToArray(card.querySelector(".in-tech").value);
+        state.academics.internships[idx] = { org, title, team, location, start, end, proofUrl, contact, bullets, tech };
+        saveDraft();
+        toast("Internship saved", "success");
+      };
+      card.querySelector(".in-del").onclick = () => {
+        state.academics.internships.splice(idx, 1);
+        renderAcademics();
+        saveDraft();
+        toast("Internship deleted", "success");
+      };
+      intList.appendChild(card);
+    });
+
+    const addInt = $("#btn-add-int");
+    if (addInt) {
+      addInt.onclick = () => {
+        state.academics.internships.unshift({
+          org: "", title: "", team: "", location: "",
+          start: "", end: "", proofUrl: "", contact: "",
+          bullets: [], tech: []
+        });
+        renderAcademics();
+        saveDraft();
+      };
+    }
+  }
+} // end renderAcademics
+
+// ---------------- Settings (Accessibility & Performance) ----------------
+function renderSettings() {
+  if ($("#a11y-skip-label")) $("#a11y-skip-label").value = state.settings.accessibility.skipLinkLabel || "Skip to content";
+  if ($("#a11y-focus-visible")) $("#a11y-focus-visible").value = state.settings.accessibility.forceFocusVisible ? "true" : "false";
+  if ($("#a11y-contrast-aa")) $("#a11y-contrast-aa").value = state.settings.accessibility.minContrastAA ? "true" : "false";
+  if ($("#a11y-require-captions")) $("#a11y-require-captions").value = state.settings.accessibility.requireCaptions ? "true" : "false";
+
+  if ($("#perf-lazy")) $("#perf-lazy").value = state.settings.performance.lazyLoadImagesDefault ? "true" : "false";
+  if ($("#perf-responsive")) $("#perf-responsive").value = state.settings.performance.responsiveImagesDefault ? "true" : "false";
+  if ($("#perf-maxw")) $("#perf-maxw").value = state.settings.performance.maxImageWidth || 2560;
+  if ($("#perf-defer")) $("#perf-defer").value = state.settings.performance.deferNonCriticalJS ? "true" : "false";
+}
+
+function bindSettings() {
+  if ($("#a11y-skip-label")) $("#a11y-skip-label").oninput = () => { state.settings.accessibility.skipLinkLabel = $("#a11y-skip-label").value.trim(); saveDraft(); };
+  if ($("#a11y-focus-visible")) $("#a11y-focus-visible").onchange = () => { state.settings.accessibility.forceFocusVisible = $("#a11y-focus-visible").value === "true"; saveDraft(); };
+  if ($("#a11y-contrast-aa")) $("#a11y-contrast-aa").onchange = () => { state.settings.accessibility.minContrastAA = $("#a11y-contrast-aa").value === "true"; saveDraft(); };
+  if ($("#a11y-require-captions")) $("#a11y-require-captions").onchange = () => { state.settings.accessibility.requireCaptions = $("#a11y-require-captions").value === "true"; saveDraft(); };
+
+  if ($("#perf-lazy")) $("#perf-lazy").onchange = () => { state.settings.performance.lazyLoadImagesDefault = $("#perf-lazy").value === "true"; saveDraft(); };
+  if ($("#perf-responsive")) $("#perf-responsive").onchange = () => { state.settings.performance.responsiveImagesDefault = $("#perf-responsive").value === "true"; saveDraft(); };
+  if ($("#perf-maxw")) $("#perf-maxw").oninput = () => { state.settings.performance.maxImageWidth = parseInt($("#perf-maxw").value || "2560", 10); saveDraft(); };
+  if ($("#perf-defer")) $("#perf-defer").onchange = () => { state.settings.performance.deferNonCriticalJS = $("#perf-defer").value === "true"; saveDraft(); };
+}
 
 // ---------------- JSON Manager ----------------
 function bindJSONManager() {
@@ -920,10 +1401,14 @@ function bindJSONManager() {
   };
 
   $("#btn-upload-json").onclick = () => $("#file-json").click();
+  
+  // FIXED: File input handler - use files[0] to get the first File object
   $("#file-json").addEventListener("change", async (e) => {
-    const file = e.target.files && e.target.files;
+    const input = e.target;
+    const file = input && input.files && input.files[0];  // FIX: Use files[0] instead of files
     if (!file) return;
     try {
+      // Modern promise API on Blob/File
       const text = await file.text();
       const data = JSON.parse(text);
       state = data;
@@ -933,9 +1418,10 @@ function bindJSONManager() {
       saveDraft();
       toast("Imported JSON", "success");
     } catch (err) {
+      $("#json-status").textContent = "Client check failed: " + (err && err.message || err);
       toast("Invalid JSON file", "error");
     } finally {
-      e.target.value = "";
+      input.value = "";
     }
   });
 
@@ -959,11 +1445,12 @@ function bindJSONManager() {
   $("#btn-load-server").onclick = loadFromServer;
   $("#btn-save-draft").onclick = saveDraft;
   $("#btn-publish").onclick = publishToServer;
-} [6]
+}
 
-// ---------------- Render All ----------------
+// ---------------- Render All (extended) ----------------
 function renderAll() {
   renderPersonalInfo();
+  renderAbout();
   renderProjectsList();
   renderBlog();
   renderNormalized();
@@ -971,16 +1458,21 @@ function renderAll() {
   renderSkills();
   renderQuickLinks();
   renderNavigation();
+  renderOpenSource();
+  renderAcademics();
+  renderSettings();
   $("#json-preview").textContent = JSON.stringify(toJSON(), null, 2);
-} [6]
+}
 
-// ---------------- Init ----------------
+// ---------------- Init (extended) ----------------
 function init() {
   setupTabs();
   bindPersonalInfo();
+  bindAbout();
   bindProjectEditor();
   bindJSONManager();
   bindBlog();
+  bindSettings();
 
   // Try draft first; optionally load from server if no draft
   if (!loadDraft()) {
@@ -989,11 +1481,14 @@ function init() {
   renderAll();
 
   // Wire "New Project" from Projects tab
-  $("#btn-new-project").onclick = () => {
-    editIndex = null;
-    clearProjectForm();
-    $(".tab-btn[data-tab='project-editor']").click();
-  };
-} [6]
+  const newBtn = $("#btn-new-project");
+  if (newBtn) {
+    newBtn.onclick = () => {
+      editIndex = null;
+      clearProjectForm();
+      $(".tab-btn[data-tab='project-editor']").click();
+    };
+  }
+}
 
 document.addEventListener("DOMContentLoaded", init);

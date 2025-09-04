@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Portfolio Dashboard</title>
+  <!-- Typography kept minimal; consider self-hosting in production -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lora:wght@400;500&family=Source+Code+Pro:wght@400&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -33,175 +31,72 @@
       --shadow: rgba(0,0,0,0.3);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Lora', serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.6;
-    }
+    body { font-family: 'Lora', serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
     header {
       background: var(--bg-secondary);
       border-bottom: 3px solid var(--text-primary);
       padding: 16px 20px;
       box-shadow: 0 2px 10px var(--shadow);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
     }
-    .title {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      font-weight: 900;
-      letter-spacing: .5px;
-    }
-    .subtitle {
-      color: var(--text-secondary);
-      font-style: italic;
-      font-size: .95rem;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    nav.tabs {
-      display: flex;
-      gap: 14px;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 10px;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
-    }
+    .title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; letter-spacing: .5px; }
+    .subtitle { color: var(--text-secondary); font-style: italic; font-size: .95rem; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+    nav.tabs { display: flex; gap: 14px; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 18px; flex-wrap: wrap; }
     .tab-btn {
-      background: none;
-      border: none;
-      padding: 10px 14px;
-      font-family: 'Lora', serif;
-      color: var(--text-secondary);
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: .2s;
+      background: none; border: none; padding: 10px 14px; font-family: 'Lora', serif; color: var(--text-secondary);
+      cursor: pointer; border-bottom: 2px solid transparent; transition: .2s;
     }
-    .tab-btn.active, .tab-btn:hover {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-      font-weight: 600;
-    }
+    .tab-btn.active, .tab-btn:hover { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
     section.panel {
-      display: none;
-      background: var(--bg-secondary);
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px var(--shadow);
-      margin-bottom: 18px;
+      display: none; background: var(--bg-secondary); padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px var(--shadow); margin-bottom: 18px;
     }
     section.panel.active { display: block; }
-
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .row-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .row-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
     .row-auto { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; }
-
     .form-group { margin-bottom: 14px; }
-    .label {
-      display: block;
-      font-family: 'Playfair Display', serif;
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
+    .label { display: block; font-family: 'Playfair Display', serif; margin-bottom: 6px; font-weight: 700; }
     .input, .textarea, .select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: 'Lora', serif;
-      font-size: 1rem;
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary);
+      font-family: 'Lora', serif; font-size: 1rem;
     }
     .textarea { min-height: 100px; resize: vertical; }
     .muted { color: var(--text-secondary); font-size: .9rem; }
-
-    .btn {
-      border: none;
-      border-radius: 4px;
-      padding: 10px 14px;
-      font-family: 'Lora', serif;
-      cursor: pointer;
-      transition: .2s;
-    }
+    .btn { border: none; border-radius: 4px; padding: 10px 14px; font-family: 'Lora', serif; cursor: pointer; transition: .2s; }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-primary:hover { filter: brightness(.9); }
     .btn-secondary { background: var(--text-secondary); color: #fff; }
     .btn-success { background: var(--success); color: #fff; }
     .btn-warning { background: var(--warning); color: #000; }
     .btn-danger { background: var(--danger); color: #fff; }
-    .btn-ghost {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      border: 1px solid var(--border);
-    }
+    .btn-ghost { background: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border); }
     .actions { display: flex; flex-wrap: wrap; gap: 10px; }
-
     .list { display: grid; gap: 10px; margin-top: 10px; }
-    .card {
-      border: 1px solid var(--border);
-      background: var(--bg-primary);
-      padding: 12px;
-      border-radius: 6px;
-      display: grid;
-      gap: 6px;
-    }
-    .card-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
+    .card { border: 1px solid var(--border); background: var(--bg-primary); padding: 12px; border-radius: 6px; display: grid; gap: 6px; }
+    .card-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
     .json-box {
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      padding: 12px;
-      border-radius: 6px;
-      font-family: 'Source Code Pro', monospace;
-      font-size: .9rem;
-      white-space: pre-wrap;
-      overflow: auto;
-      max-height: 400px;
+      background: var(--bg-primary); border: 1px solid var(--border); padding: 12px; border-radius: 6px;
+      font-family: 'Source Code Pro', monospace; font-size: .9rem; white-space: pre-wrap; overflow: auto; max-height: 400px;
     }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 3px;
-      font-size: .75rem;
-      border: 1px solid var(--border);
-      background: var(--bg-secondary);
-      color: var(--text-secondary);
-    }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: .75rem; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); }
     .hint { color: var(--text-muted); font-size: .85rem; }
-
     .divider { height: 1px; background: var(--border); margin: 12px 0; }
-
-    /* Blog preview helpers */
+    /* Pills, chips, previews */
     .pill { display:inline-block; background:var(--bg-secondary); border:1px solid var(--border); padding:4px 8px; border-radius:999px; font-size:.8rem; margin-right:6px; }
+    .chip-input { display:flex; gap:6px; flex-wrap:wrap; padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--bg-primary); }
+    .chip { display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; border:1px solid var(--border); }
     .preview { display:flex; gap:12px; align-items:flex-start; }
     .preview img { width:120px; height:80px; object-fit:cover; border:1px solid var(--border); border-radius:4px; }
-
-    @media (max-width: 900px) {
-      .row, .row-3, .row-auto { grid-template-columns: 1fr; }
-      nav.tabs { gap: 8px; }
-    }
+    @media (max-width: 900px) { .row, .row-3, .row-4, .row-auto { grid-template-columns: 1fr; } nav.tabs { gap: 8px; } }
   </style>
 </head>
 <body>
   <header>
     <div>
       <div class="title">Portfolio Dashboard</div>
-      <div class="subtitle">One source of truth → JSON → Your site</div>
+      <div class="subtitle">Single source of truth → JSON → Site</div>
     </div>
     <div class="actions">
       <button id="btn-dark" class="btn btn-ghost">Toggle Theme</button>
@@ -212,46 +107,50 @@
   </header>
 
   <div class="container">
-    <nav class="tabs">
-      <button class="tab-btn active" data-tab="personal">Personal Info</button>
-      <button class="tab-btn" data-tab="projects">Projects</button>
-      <button class="tab-btn" data-tab="project-editor">Add/Edit Project</button>
-      <button class="tab-btn" data-tab="blog">Blog (Manual URLs)</button>
-      <button class="tab-btn" data-tab="sidebar">Sidebar</button>
-      <button class="tab-btn" data-tab="navigation">Navigation</button>
-      <button class="tab-btn" data-tab="json">JSON Manager</button>
+    <nav class="tabs" role="tablist" aria-label="Dashboard sections">
+      <button class="tab-btn active" data-tab="personal" role="tab" aria-selected="true">Personal Info</button>
+      <button class="tab-btn" data-tab="about" role="tab">About</button>
+      <button class="tab-btn" data-tab="projects" role="tab">Projects</button>
+      <button class="tab-btn" data-tab="project-editor" role="tab">Add/Edit Project</button>
+      <button class="tab-btn" data-tab="open-source" role="tab">Open Source</button>
+      <button class="tab-btn" data-tab="academics" role="tab">Academics</button>
+      <button class="tab-btn" data-tab="blog" role="tab">Blog</button>
+      <button class="tab-btn" data-tab="sidebar" role="tab">Sidebar</button>
+      <button class="tab-btn" data-tab="navigation" role="tab">Navigation</button>
+      <button class="tab-btn" data-tab="settings" role="tab">Settings</button>
+      <button class="tab-btn" data-tab="json" role="tab">JSON Manager</button>
     </nav>
 
     <!-- Personal Info -->
-    <section id="panel-personal" class="panel active">
+    <section id="panel-personal" class="panel active" role="tabpanel" aria-labelledby="personal">
       <div class="row">
         <div class="form-group">
-          <label class="label">Full Name</label>
+          <label class="label" for="pi-name">Full Name</label>
           <input id="pi-name" class="input" placeholder="Your Name">
         </div>
         <div class="form-group">
-          <label class="label">Professional Title</label>
+          <label class="label" for="pi-title">Professional Title</label>
           <input id="pi-title" class="input" placeholder="AI Engineer • Systems Programmer • ML Researcher">
         </div>
       </div>
       <div class="row">
         <div class="form-group">
-          <label class="label">Medium Username</label>
+          <label class="label" for="pi-medium">Medium Username</label>
           <input id="pi-medium" class="input" placeholder="psypherion">
-          <div class="hint">Used to integrate Medium posts later (feed mode); manual URLs live in Blog tab below.</div>
+          <div class="hint">Manual URLs live in Blog; feed import later if desired.</div>
         </div>
         <div class="form-group">
-          <label class="label">GitHub Username</label>
+          <label class="label" for="pi-github">GitHub Username</label>
           <input id="pi-github" class="input" placeholder="your-github">
         </div>
       </div>
       <div class="row">
         <div class="form-group">
-          <label class="label">Updated Label (e.g., Updated September 2025)</label>
+          <label class="label" for="pi-updated">Updated Label</label>
           <input id="pi-updated" class="input" placeholder="Updated September 2025">
         </div>
         <div class="form-group">
-          <label class="label">Default Theme</label>
+          <label class="label" for="pi-theme">Default Theme</label>
           <select id="pi-theme" class="select">
             <option value="light">light</option>
             <option value="dark">dark</option>
@@ -264,21 +163,69 @@
       </div>
     </section>
 
+    <!-- About -->
+    <section id="panel-about" class="panel" role="tabpanel" aria-labelledby="about">
+      <div class="card">
+        <div class="card-row">
+          <div><strong>About</strong></div>
+          <div class="actions">
+            <button class="btn btn-primary" id="btn-save-about">Save About</button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label class="label" for="about-tagline">Positioning Statement</label>
+            <input id="about-tagline" class="input" placeholder="Who does what for whom (in one line)">
+          </div>
+          <div class="form-group">
+            <label class="label" for="about-photo-src">Headshot URL</label>
+            <input id="about-photo-src" class="input" placeholder="/assets/me.webp">
+            <div class="hint">Provide alt text for accessibility.</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label class="label" for="about-bio">Short Bio</label>
+            <textarea id="about-bio" class="textarea" placeholder="Concise bio..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="label" for="about-photo-alt">Headshot Alt</label>
+            <input id="about-photo-alt" class="input" placeholder="Portrait of ...">
+          </div>
+        </div>
+        <div class="row-3">
+          <div class="form-group">
+            <label class="label" for="about-cta-label">CTA Label</label>
+            <input id="about-cta-label" class="input" placeholder="Get in touch">
+          </div>
+          <div class="form-group">
+            <label class="label" for="about-cta-url">CTA URL</label>
+            <input id="about-cta-url" class="input" placeholder="/contact">
+          </div>
+          <div class="form-group">
+            <label class="label" for="about-jsonld">Generate Person JSON‑LD</label>
+            <select id="about-jsonld" class="select">
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Projects List -->
-    <section id="panel-projects" class="panel">
+    <section id="panel-projects" class="panel" role="tabpanel" aria-labelledby="projects">
       <div class="card">
         <div class="card-row">
           <div><strong>Projects</strong> <span id="projects-count" class="badge">0</span></div>
-          <div class="actions">
-            <button class="btn btn-primary" id="btn-new-project">New Project</button>
-          </div>
+          <div class="actions"><button class="btn btn-primary" id="btn-new-project">New Project</button></div>
         </div>
         <div id="projects-list" class="list"></div>
       </div>
     </section>
 
-    <!-- Project Editor -->
-    <section id="panel-project-editor" class="panel">
+    <!-- Project Editor (Case Study mode included) -->
+    <section id="panel-project-editor" class="panel" role="tabpanel" aria-labelledby="project-editor">
       <div class="card">
         <div class="card-row">
           <div><strong id="pe-title">Add New Project</strong></div>
@@ -291,42 +238,76 @@
 
         <div class="row">
           <div class="form-group">
-            <label class="label">Project ID (URL-safe)</label>
+            <label class="label" for="pr-id">Project ID (URL-safe)</label>
             <input id="pr-id" class="input" placeholder="mecnet">
             <div class="hint">Only letters, numbers, hyphens, underscores.</div>
           </div>
           <div class="form-group">
-            <label class="label">Title</label>
+            <label class="label" for="pr-title">Title</label>
             <input id="pr-title" class="input" placeholder="MEC net - Continual Learning Language Model">
           </div>
         </div>
 
         <div class="row-3">
           <div class="form-group">
-            <label class="label">Category</label>
+            <label class="label" for="pr-category">Category</label>
             <input id="pr-category" class="input" placeholder="Research Project">
           </div>
           <div class="form-group">
-            <label class="label">Status</label>
+            <label class="label" for="pr-status">Status</label>
             <input id="pr-status" class="input" placeholder="In Development">
           </div>
           <div class="form-group">
-            <label class="label">Date</label>
+            <label class="label" for="pr-date">Date</label>
             <input id="pr-date" class="input" placeholder="August 2025">
           </div>
         </div>
 
         <div class="form-group">
-          <label class="label">Summary</label>
+          <label class="label" for="pr-summary">Summary</label>
           <textarea id="pr-summary" class="textarea" placeholder="Brief project description..."></textarea>
         </div>
 
-        <div class="form-group">
-          <label class="label">Featured</label>
-          <select id="pr-featured" class="select">
-            <option value="false">false</option>
-            <option value="true">true</option>
-          </select>
+        <div class="row-3">
+          <div class="form-group">
+            <label class="label" for="pr-role">Role</label>
+            <input id="pr-role" class="input" placeholder="Lead Engineer">
+          </div>
+          <div class="form-group">
+            <label class="label" for="pr-resp">Responsibilities (comma‑separated)</label>
+            <input id="pr-resp" class="input" placeholder="Model design, Training pipeline, Evaluation">
+          </div>
+          <div class="form-group">
+            <label class="label" for="pr-featured">Featured</label>
+            <select id="pr-featured" class="select">
+              <option value="false">false</option>
+              <option value="true">true</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-row"><div><strong>Case Study</strong></div></div>
+          <div class="row">
+            <div class="form-group">
+              <label class="label" for="pr-problem">Problem</label>
+              <textarea id="pr-problem" class="textarea" placeholder="What was the challenge?"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="label" for="pr-approach">Approach</label>
+              <textarea id="pr-approach" class="textarea" placeholder="How was it solved?"></textarea>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label class="label" for="pr-impact">Impact</label>
+              <textarea id="pr-impact" class="textarea" placeholder="What changed or improved (with metrics)?"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="label" for="pr-outcomes">Outcomes (one per line)</label>
+              <textarea id="pr-outcomes" class="textarea" placeholder="Reduced inference latency by 35%&#10;Cut training cost by 22%"></textarea>
+            </div>
+          </div>
         </div>
 
         <div class="divider"></div>
@@ -334,9 +315,7 @@
         <div class="card">
           <div class="card-row">
             <div><strong>Media Tabs</strong> <span id="media-count" class="badge">0</span></div>
-            <div class="actions">
-              <button class="btn btn-secondary" id="btn-add-media">Add Media Tab</button>
-            </div>
+            <div class="actions"><button class="btn btn-secondary" id="btn-add-media">Add Media Tab</button></div>
           </div>
           <div id="media-list" class="list"></div>
         </div>
@@ -345,39 +324,81 @@
 
         <div class="row">
           <div class="form-group">
-            <label class="label">Tech Specs Title</label>
+            <label class="label" for="pr-tech-title">Tech Specs Title</label>
             <input id="pr-tech-title" class="input" placeholder="Technical Implementation">
           </div>
           <div class="form-group">
-            <label class="label">Tech Specs (one per line)</label>
+            <label class="label" for="pr-tech-items">Tech Specs (one per line)</label>
             <textarea id="pr-tech-items" class="textarea" placeholder="PyTorch, Transformers library&#10;Custom attention mechanisms"></textarea>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="label">Content Paragraphs (one per line)</label>
+          <label class="label" for="pr-content">Content Paragraphs (one per line)</label>
           <textarea id="pr-content" class="textarea" placeholder="Paragraph 1...&#10;Paragraph 2..."></textarea>
         </div>
 
         <div class="row-3">
           <div class="form-group">
-            <label class="label">GitHub URL</label>
-            <input id="pr-link-github" class="input" placeholder="https://github.com/..." />
+            <label class="label" for="pr-link-github">GitHub URL</label>
+            <input id="pr-link-github" class="input" placeholder="https://github.com/..."/>
           </div>
           <div class="form-group">
-            <label class="label">Demo URL</label>
-            <input id="pr-link-demo" class="input" placeholder="https://..." />
+            <label class="label" for="pr-link-demo">Demo URL</label>
+            <input id="pr-link-demo" class="input" placeholder="https://..."/>
           </div>
           <div class="form-group">
-            <label class="label">Paper URL</label>
-            <input id="pr-link-paper" class="input" placeholder="https://arxiv.org/abs/..." />
+            <label class="label" for="pr-link-paper">Paper URL</label>
+            <input id="pr-link-paper" class="input" placeholder="https://arxiv.org/abs/..."/>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Blog (Manual URLs) -->
-    <section id="panel-blog" class="panel">
+    <!-- Open Source -->
+    <section id="panel-open-source" class="panel" role="tabpanel" aria-labelledby="open-source">
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Open Source</strong> <span id="oss-count" class="badge">0</span></div>
+          <div class="actions"><button class="btn btn-secondary" id="btn-add-oss">Add Project</button></div>
+        </div>
+        <div id="oss-list" class="list"></div>
+      </div>
+    </section>
+
+    <!-- Academics -->
+    <section id="panel-academics" class="panel" role="tabpanel" aria-labelledby="academics">
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Education</strong> <span id="edu-count" class="badge">0</span></div>
+          <div class="actions"><button class="btn btn-secondary" id="btn-add-edu">Add Education</button></div>
+        </div>
+        <div id="edu-list" class="list"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Exams & Certifications</strong> <span id="exam-count" class="badge">0</span></div>
+          <div class="actions"><button class="btn btn-secondary" id="btn-add-exam">Add Exam</button></div>
+        </div>
+        <div id="exam-list" class="list"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Internships</strong> <span id="int-count" class="badge">0</span></div>
+          <div class="actions"><button class="btn btn-secondary" id="btn-add-int">Add Internship</button></div>
+        </div>
+        <div id="int-list" class="list"></div>
+      </div>
+    </section>
+
+    <!-- Blog (Manual URLs + Taxonomy) -->
+    <section id="panel-blog" class="panel" role="tabpanel" aria-labelledby="blog">
       <div class="card">
         <div class="card-row">
           <div><strong>Blog (Manual URLs)</strong> <span id="blog-count" class="badge">0</span></div>
@@ -389,20 +410,49 @@
 
         <div class="row">
           <div class="form-group">
-            <label class="label">Show on homepage</label>
+            <label class="label" for="blog-show">Show on homepage</label>
             <select id="blog-show" class="select">
               <option value="true">true</option>
               <option value="false">false</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="label">Cache TTL (minutes)</label>
+            <label class="label" for="blog-ttl">Cache TTL (minutes)</label>
             <input id="blog-ttl" type="number" class="input" value="15" min="1">
-            <div class="hint">Server caches OG previews to avoid refetching on every edit.</div>
+            <div class="hint">Server caches OG previews to reduce refetch during edits.</div>
           </div>
         </div>
 
         <div id="blog-list" class="list"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Taxonomy</strong></div>
+          <div class="actions">
+            <button class="btn btn-secondary" id="btn-add-category">Add Category</button>
+            <button class="btn btn-secondary" id="btn-add-series">Add Series</button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label class="label" for="blog-categories">Categories (broad)</label>
+            <textarea id="blog-categories" class="textarea" placeholder="Reviews&#10;Philosophy&#10;Psychology&#10;General"></textarea>
+            <div class="hint">Keep categories broad and limited (e.g., 5–10) for clear structure.</div>
+          </div>
+          <div class="form-group">
+            <label class="label" for="blog-tag-suggestions">Tag suggestions (optional)</label>
+            <textarea id="blog-tag-suggestions" class="textarea" placeholder="book-review&#10;cognitive-bias&#10;ai-ethics"></textarea>
+            <div class="hint">Tags are specific descriptors; reuse across posts for discovery.</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="label" for="blog-series-json">Series (JSON array)</label>
+          <textarea id="blog-series-json" class="textarea" placeholder='[{"id":"stoicism","title":"Stoicism 101","items":["https://...","https://..."]}]'></textarea>
+          <div class="hint">Curate reading orders without overloading categories.</div>
+        </div>
       </div>
 
       <div class="divider"></div>
@@ -417,13 +467,11 @@
     </section>
 
     <!-- Sidebar (Updates, Skills, Quick Links) -->
-    <section id="panel-sidebar" class="panel">
+    <section id="panel-sidebar" class="panel" role="tabpanel" aria-labelledby="sidebar">
       <div class="card">
         <div class="card-row">
           <div><strong>Latest Updates</strong> <span id="upd-count" class="badge">0</span></div>
-          <div class="actions">
-            <button class="btn btn-secondary" id="btn-add-update">Add Update</button>
-          </div>
+          <div class="actions"><button class="btn btn-secondary" id="btn-add-update">Add Update</button></div>
         </div>
         <div id="updates-list" class="list"></div>
       </div>
@@ -433,9 +481,7 @@
       <div class="card">
         <div class="card-row">
           <div><strong>Skills Sections</strong> <span id="skills-count" class="badge">0</span></div>
-          <div class="actions">
-            <button class="btn btn-secondary" id="btn-add-skill-section">Add Skills Section</button>
-          </div>
+          <div class="actions"><button class="btn btn-secondary" id="btn-add-skill-section">Add Skills Section</button></div>
         </div>
         <div id="skills-list" class="list"></div>
       </div>
@@ -445,16 +491,14 @@
       <div class="card">
         <div class="card-row">
           <div><strong>Quick Links</strong> <span id="ql-count" class="badge">0</span></div>
-          <div class="actions">
-            <button class="btn btn-secondary" id="btn-add-ql">Add Link</button>
-          </div>
+          <div class="actions"><button class="btn btn-secondary" id="btn-add-ql">Add Link</button></div>
         </div>
         <div id="ql-list" class="list"></div>
       </div>
     </section>
 
     <!-- Navigation -->
-    <section id="panel-navigation" class="panel">
+    <section id="panel-navigation" class="panel" role="tabpanel" aria-labelledby="navigation">
       <div class="card">
         <div class="card-row">
           <div><strong>Navigation Items</strong> <span id="nav-count" class="badge">0</span></div>
@@ -466,8 +510,91 @@
       </div>
     </section>
 
+    <!-- Settings (Accessibility, Performance) -->
+    <section id="panel-settings" class="panel" role="tabpanel" aria-labelledby="settings">
+      <div class="card">
+        <div class="card-row"><div><strong>Accessibility</strong></div></div>
+        <div class="row-3">
+          <div class="form-group">
+            <label class="label" for="a11y-skip-label">Skip Link Label</label>
+            <input id="a11y-skip-label" class="input" placeholder="Skip to content">
+            <div class="hint">Adds a keyboard-accessible “bypass blocks” link.</div>
+          </div>
+          <div class="form-group">
+            <label class="label" for="a11y-focus-visible">Force Focus Visible</label>
+            <select id="a11y-focus-visible" class="select">
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="label" for="a11y-contrast-aa">Enforce AA Contrast</label>
+            <select id="a11y-contrast-aa" class="select">
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label class="label" for="a11y-require-captions">Require Media Captions</label>
+            <select id="a11y-require-captions" class="select">
+              <option value="false">false</option>
+              <option value="true">true</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="card-row"><div><strong>Performance</strong></div></div>
+        <div class="row-3">
+          <div class="form-group">
+            <label class="label" for="perf-lazy">Lazy‑load Images (default)</label>
+            <select id="perf-lazy" class="select">
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+            <div class="hint">Use native loading="lazy" for below‑the‑fold images.</div>
+          </div>
+          <div class="form-group">
+            <label class="label" for="perf-responsive">Responsive Images (default)</label>
+            <select id="perf-responsive" class="select">
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+            <div class="hint">Emit srcset/sizes and prefer WebP with fallback.</div>
+          </div>
+          <div class="form-group">
+            <label class="label" for="perf-maxw">Max Image Width (px)</label>
+            <input id="perf-maxw" type="number" class="input" value="2560" min="800">
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label class="label" for="perf-defer">Defer Noncritical JS</label>
+            <select id="perf-defer" class="select">
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="card-row"><div><strong>CSS Strategy</strong></div></div>
+        <div class="form-group">
+          <div class="hint">Avoid Tailwind Play CDN in production; use a build step if adopting Tailwind to tree‑shake CSS and prevent runtime FOUC.</div>
+        </div>
+      </div>
+    </section>
+
     <!-- JSON Manager -->
-    <section id="panel-json" class="panel">
+    <section id="panel-json" class="panel" role="tabpanel" aria-labelledby="json">
       <div class="actions" style="margin-bottom:10px;">
         <button class="btn btn-ghost" id="btn-generate-json">Generate JSON</button>
         <button class="btn btn-primary" id="btn-download-json">Download JSON</button>
@@ -475,7 +602,7 @@
         <button class="btn btn-warning" id="btn-upload-json">Import JSON</button>
         <button class="btn btn-success" id="btn-validate-json">Validate (Client)</button>
       </div>
-      <div id="json-preview" class="json-box">{"personalInfo":{}, "projects":[], "blog":{}}</div>
+      <div id="json-preview" class="json-box">{"personalInfo":{}, "about":{}, "projects":[], "openSource":[], "academics":{}, "blog":{}, "settings":{}}</div>
       <div id="json-status" class="muted" style="margin-top:8px;"></div>
     </section>
   </div>

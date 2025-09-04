@@ -16,6 +16,28 @@
       "required": ["name", "title"],
       "additionalProperties": false
     },
+
+    "about": {
+      "type": "object",
+      "properties": {
+        "tagline": { "type": "string", "minLength": 1 },
+        "bio": { "type": "string", "minLength": 1 },
+        "photo": { "$ref": "#/definitions/imageRef" },
+        "cta": {
+          "type": "object",
+          "properties": {
+            "label": { "type": "string", "minLength": 1 },
+            "url": { "type": "string" }
+          },
+          "required": ["label", "url"],
+          "additionalProperties": false
+        },
+        "personJSONLD": { "type": "boolean", "default": true }
+      },
+      "required": ["tagline", "bio", "photo"],
+      "additionalProperties": false
+    },
+
     "navigation": {
       "type": "array",
       "items": {
@@ -28,6 +50,7 @@
         "additionalProperties": false
       }
     },
+
     "sidebar": {
       "type": "object",
       "properties": {
@@ -49,10 +72,7 @@
             "type": "object",
             "properties": {
               "title": { "type": "string" },
-              "items": {
-                "type": "array",
-                "items": { "type": "string" }
-              }
+              "items": { "type": "array", "items": { "type": "string" } }
             },
             "required": ["title", "items"],
             "additionalProperties": false
@@ -74,10 +94,28 @@
       "required": ["updates", "skillsSections", "quickLinks"],
       "additionalProperties": false
     },
+
     "projects": {
       "type": "array",
       "items": { "$ref": "#/definitions/project" }
     },
+
+    "openSource": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/openSourceItem" }
+    },
+
+    "academics": {
+      "type": "object",
+      "properties": {
+        "education": { "type": "array", "items": { "$ref": "#/definitions/educationItem" } },
+        "exams": { "type": "array", "items": { "$ref": "#/definitions/examItem" } },
+        "internships": { "type": "array", "items": { "$ref": "#/definitions/internshipItem" } }
+      },
+      "required": ["education", "exams", "internships"],
+      "additionalProperties": false
+    },
+
     "blog": {
       "type": "object",
       "properties": {
@@ -92,14 +130,45 @@
           "type": "array",
           "description": "Server-filled cache derived from manualPosts",
           "items": { "$ref": "#/definitions/blogNormalizedPost" }
-        }
+        },
+        "taxonomy": { "$ref": "#/definitions/blogTaxonomy" }
       },
       "required": ["mode", "manualPosts"],
       "additionalProperties": false
+    },
+
+    "settings": {
+      "type": "object",
+      "properties": {
+        "accessibility": {
+          "type": "object",
+          "properties": {
+            "skipLinkLabel": { "type": "string", "default": "Skip to content" },
+            "forceFocusVisible": { "type": "boolean", "default": true },
+            "minContrastAA": { "type": "boolean", "default": true },
+            "requireCaptions": { "type": "boolean", "default": false }
+          },
+          "additionalProperties": false
+        },
+        "performance": {
+          "type": "object",
+          "properties": {
+            "lazyLoadImagesDefault": { "type": "boolean", "default": true },
+            "responsiveImagesDefault": { "type": "boolean", "default": true },
+            "maxImageWidth": { "type": "integer", "minimum": 320, "default": 2560 },
+            "deferNonCriticalJS": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["accessibility", "performance"],
+      "additionalProperties": false
     }
   },
+
   "required": ["personalInfo", "projects"],
   "additionalProperties": false,
+
   "definitions": {
     "imageRef": {
       "type": "object",
@@ -110,6 +179,7 @@
       "required": ["src", "alt"],
       "additionalProperties": false
     },
+
     "thumbnailRef": {
       "type": "object",
       "properties": {
@@ -120,6 +190,7 @@
       "required": ["src", "fullSrc"],
       "additionalProperties": false
     },
+
     "mediaTab": {
       "type": "object",
       "properties": {
@@ -186,18 +257,17 @@
         }
       ]
     },
+
     "techSpecs": {
       "type": "object",
       "properties": {
         "title": { "type": "string" },
-        "items": {
-          "type": "array",
-          "items": { "type": "string" }
-        }
+        "items": { "type": "array", "items": { "type": "string" } }
       },
       "required": ["title", "items"],
       "additionalProperties": false
     },
+
     "projectLinks": {
       "type": "object",
       "properties": {
@@ -208,6 +278,20 @@
       },
       "additionalProperties": { "type": "string" }
     },
+
+    "caseStudy": {
+      "type": "object",
+      "properties": {
+        "role": { "type": "string" },
+        "responsibilities": { "type": "array", "items": { "type": "string" } },
+        "problem": { "type": "string" },
+        "approach": { "type": "string" },
+        "impact": { "type": "string" },
+        "outcomes": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+
     "project": {
       "type": "object",
       "properties": {
@@ -228,26 +312,107 @@
         "media": {
           "type": "object",
           "properties": {
-            "tabs": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/mediaTab" },
-              "minItems": 1
-            }
+            "tabs": { "type": "array", "items": { "$ref": "#/definitions/mediaTab" }, "minItems": 1 }
           },
           "required": ["tabs"],
           "additionalProperties": false
         },
         "techSpecs": { "$ref": "#/definitions/techSpecs" },
-        "content": {
-          "type": "array",
-          "items": { "type": "string" },
-          "minItems": 1
-        },
-        "links": { "$ref": "#/definitions/projectLinks" }
+        "content": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "links": { "$ref": "#/definitions/projectLinks" },
+        "caseStudy": { "$ref": "#/definitions/caseStudy" }
       },
       "required": ["id", "title", "meta", "summary", "content"],
       "additionalProperties": false
     },
+
+    "openSourceItem": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "blurb": { "type": "string" },
+        "repoUrl": { "type": "string" },
+        "demoUrl": { "type": "string" },
+        "license": { "type": "string" },
+        "goodFirstIssuesUrl": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["name", "repoUrl"],
+      "additionalProperties": false
+    },
+
+    "educationItem": {
+      "type": "object",
+      "properties": {
+        "level": { "type": "string", "enum": ["secondary", "higherSecondary", "bachelors", "masters"] },
+        "institution": { "type": "string" },
+        "board": { "type": "string" },
+        "location": { "type": "string" },
+        "start": { "type": "string" },
+        "end": { "type": "string" },
+        "grade": { "type": "string" },
+        "honors": { "type": "string" },
+        "coursework": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["level", "institution"],
+      "additionalProperties": false
+    },
+
+    "examItem": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "subject": { "type": "string" },
+        "authority": { "type": "string" },
+        "year": { "type": "string" },
+        "score": { "type": "string" },
+        "percentile": { "type": "string" },
+        "rank": { "type": "string" },
+        "certificateUrl": { "type": "string" }
+      },
+      "required": ["name", "year"],
+      "additionalProperties": false
+    },
+
+    "internshipItem": {
+      "type": "object",
+      "properties": {
+        "org": { "type": "string" },
+        "title": { "type": "string" },
+        "team": { "type": "string" },
+        "location": { "type": "string" },
+        "start": { "type": "string" },
+        "end": { "type": "string" },
+        "proofUrl": { "type": "string" },
+        "contact": { "type": "string" },
+        "bullets": { "type": "array", "items": { "type": "string" } },
+        "tech": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["org", "title", "start"],
+      "additionalProperties": false
+    },
+
+    "blogSeries": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "items": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      },
+      "required": ["id", "title", "items"],
+      "additionalProperties": false
+    },
+
+    "blogTaxonomy": {
+      "type": "object",
+      "properties": {
+        "categories": { "type": "array", "items": { "type": "string" } },
+        "tagSuggestions": { "type": "array", "items": { "type": "string" } },
+        "series": { "type": "array", "items": { "$ref": "#/definitions/blogSeries" } }
+      },
+      "additionalProperties": false
+    },
+
     "blogManualPost": {
       "type": "object",
       "properties": {
@@ -268,6 +433,7 @@
       "required": ["url"],
       "additionalProperties": false
     },
+
     "blogNormalizedPost": {
       "type": "object",
       "properties": {
@@ -279,7 +445,8 @@
         "readMinutes": { "type": "integer", "minimum": 1 },
         "tags": { "type": "array", "items": { "type": "string" } },
         "category": { "type": "string" },
-        "pinned": { "type": "boolean" }
+        "pinned": { "type": "boolean" },
+        "series": { "type": "array", "items": { "type": "string" } }
       },
       "required": ["url", "title"],
       "additionalProperties": false
