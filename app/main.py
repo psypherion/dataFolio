@@ -1,5 +1,3 @@
-# app/main.py
-
 from fastapi import FastAPI, HTTPException, Query, UploadFile, File
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -8,11 +6,11 @@ from typing import Any, Dict, List, Optional, Tuple
 import json, os, time, re, logging
 
 from jsonschema import validate, ValidationError, RefResolver
-import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+import requests  
+from requests.adapters import HTTPAdapter  
+from urllib3.util.retry import Retry  
+from bs4 import BeautifulSoup  
+from urllib.parse import urljoin  
 
 # ---------------- Paths ----------------
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -316,52 +314,152 @@ def validate_project(project_data: Dict[str, Any]):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Validation error: {str(e)}")
 
-# ---------------- Blog preview/normalize (simplified) ----------------
+# ---------------- Blog preview/normalize (RESTORED FULL IMPLEMENTATION) ----------------
+
+# Cache: { url: (expires_epoch, data) }
 BLOG_CACHE: Dict[str, Tuple[float, Dict[str, Any]]] = {}
-DEFAULT_TTL_SECONDS = 15 * 60
+DEFAULT_TTL_SECONDS = 15 * 60  # 15 minutes default
+
+log = logging.getLogger("blog")
+
+# Hardened Session with retries for transient upstream issues (429/5xx)
+SESSION = requests.Session()  # persistent session for connection reuse
+retries = Retry(
+    total=3,
+    backoff_factor=0.5,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=["GET", "HEAD"]
+)  # robust retry policy using urllib3 Retry
+SESSION.mount("http://", HTTPAdapter(max_retries=retries))  # adapter with retries
+SESSION.mount("https://", HTTPAdapter(max_retries=retries))  # adapter with retries
+
+REQ_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/125.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9"
+}  # realistic browser headers help avoid blocked/incomplete responses
+
+def _text_meta(soup: BeautifulSoup, name_or_prop: str) -> str:
+    # Try property first then name to support both attribute styles in OG/meta
+    tag = soup.find("meta", attrs={"property": name_or_prop}) or soup.find("meta", attrs={"name": name_or_prop})
+    if not tag:
+        return ""
+    return (tag.get("content") or "").strip()  # type: ignore 
+
+def _first_paragraph(soup: BeautifulSoup) -> str:
+    # Reasonable paragraph fallback for previews when og:description is missing
+    for p in soup.select("article p, .post p, .section-content p, p"):
+        t = p.get_text(" ", strip=True)
+        if len(t) > 60:
+            return t
+    return ""  # fallback summary when OG description absent
+
+def _parse_og(soup: BeautifulSoup, base_url: str) -> Dict[str, Any]:
+    # Open Graph and article meta extraction
+    title = _text_meta(soup, "og:title")
+    if not title and soup.title and soup.title.string:
+        title = soup.title.string.strip()
+    description = _text_meta(soup, "og:description") or _text_meta(soup, "description")
+    image = _text_meta(soup, "og:image")
+    if image:
+        image = urljoin(base_url, image)  # resolve relative URL if needed
+    date = _text_meta(soup, "article:published_time") or _text_meta(soup, "og:updated_time") or _text_meta(soup, "article:modified_time")
+    tags = [m.get("content", "").strip() for m in soup.find_all("meta", attrs={"property": "article:tag"}) if m.get("content")] # type: ignore
+    return {"title": title, "description": description, "image": image, "date": date, "tags": tags}  # normalized OG data
+
+def _estimate_read_minutes(text: str) -> int:
+    words = re.findall(r"\w+", text or "")
+    return max(1, round(len(words) / 200.0))  # ~200 wpm heuristic for read time
+
+def fetch_preview(url: str) -> Dict[str, Any]:
+    # HTTP fetch with robust headers and retries; parse OG; fallback to first meaningful paragraph for description
+    r = SESSION.get(url, headers=REQ_HEADERS, timeout=15)
+    if r.status_code >= 400:
+        log.warning("Preview fetch failed %s for %s", r.status_code, url)
+        raise HTTPException(status_code=502, detail=f"Upstream error {r.status_code}")
+    
+    # Prefer lxml if installed; fall back to html.parser for portability
+    try:
+        soup = BeautifulSoup(r.text, "lxml")
+    except Exception:
+        soup = BeautifulSoup(r.text, "html.parser")
+    
+    og = _parse_og(soup, url)
+    summary = og["description"] or _first_paragraph(soup)
+    read_minutes = _estimate_read_minutes(summary)
+    
+    return {
+        "url": url,
+        "title": og["title"] or url,
+        "summary": (summary or "")[:1000],
+        "image": og["image"] or "",
+        "date": og["date"] or "",
+        "tags": og["tags"] or [],
+        "readMinutes": read_minutes
+    }  # normalized preview payload
 
 @app.get("/api/blog/preview")
 def blog_preview(url: str = Query(..., min_length=10)):
-    """Simple blog preview - implement full functionality as needed"""
-    # Return basic preview for now
-    return {
-        "url": url,
-        "title": "Blog Post Title",
-        "summary": "Blog post summary...",
-        "image": "",
-        "date": "",
-        "tags": [],
-        "readMinutes": 3
-    }
+    # Use TTL cache to avoid repeated upstream hits while editing
+    now = time.time()
+    cached = BLOG_CACHE.get(url)
+    if cached and cached[0] > now:
+        return cached[1]  # return cached data while fresh
+    
+    try:
+        data = fetch_preview(url)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Preview fetch failed: {e}")
+    
+    BLOG_CACHE[url] = (now + DEFAULT_TTL_SECONDS, data)
+    return data  # preview result
 
 class NormalizePayload(BaseModel):
     urls: List[str]
-    overrides: Optional[Dict[str, Dict[str, str]]] = None
-    categories: Optional[Dict[str, str]] = None
-    pinned: Optional[Dict[str, bool]] = None
-    ttl: Optional[int] = 15
+    overrides: Optional[Dict[str, Dict[str, str]]] = None  # { url: {title, summary, image, date} }
+    categories: Optional[Dict[str, str]] = None            # { url: "category" }
+    pinned: Optional[Dict[str, bool]] = None               # { url: true/false }
+    ttl: Optional[int] = 15                                 # minutes
 
 @app.post("/api/blog/normalize")
 def blog_normalize(payload: NormalizePayload):
-    """Normalize blog posts - simplified version"""
-    normalized = []
-    for url in payload.urls:
-        item = {
-            "url": url,
-            "title": "Sample Title",
-            "summary": "Sample summary",
-            "image": "",
-            "date": "",
-            "tags": [],
-            "readMinutes": 3
-        }
-        if payload.categories and url in payload.categories:
-            item["category"] = payload.categories[url]
-        if payload.pinned and payload.pinned.get(url, False):
+    # Adjust TTL for subsequent previews in this process
+    global DEFAULT_TTL_SECONDS
+    try:
+        ttl_minutes = max(1, int(payload.ttl or 15))
+    except Exception:
+        ttl_minutes = 15
+    DEFAULT_TTL_SECONDS = ttl_minutes * 60  # update cache TTL baseline
+
+    normalized: List[Dict[str, Any]] = []
+    for u in payload.urls:
+        prev = blog_preview(u)  # uses cache when present - NOW ACTUALLY WORKS!
+        item = dict(prev)
+        if payload.categories and u in payload.categories:
+            item["category"] = payload.categories[u]
+        if payload.pinned and payload.pinned.get(u, False):
             item["pinned"] = True
+        if payload.overrides and u in payload.overrides:
+            ov = payload.overrides[u] or {}
+            for k in ("title", "summary", "image", "date"):
+                if ov.get(k):
+                    item[k] = ov[k]
         normalized.append(item)
-    
-    return {"normalized": normalized}
+
+    return {"normalized": normalized}  # batch normalized response
+
+# Optional: clear blog cache endpoint (RESTORED)
+@app.post("/api/blog/cache/clear")
+def clear_blog_cache():
+    count = len(BLOG_CACHE)
+    BLOG_CACHE.clear()
+    return {"cleared": count}  # simple cache clear utility
 
 # ---------------- Utility Endpoints ----------------
 @app.get("/api/health")
