@@ -89,7 +89,152 @@
     .chip { display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; border:1px solid var(--border); }
     .preview { display:flex; gap:12px; align-items:flex-start; }
     .preview img { width:120px; height:80px; object-fit:cover; border:1px solid var(--border); border-radius:4px; }
-    @media (max-width: 900px) { .row, .row-3, .row-4, .row-auto { grid-template-columns: 1fr; } nav.tabs { gap: 8px; } }
+
+    /* ========== PROJECT IMPORT STYLES (NEW) ========== */
+    .import-controls {
+      margin-bottom: 20px;
+    }
+    
+    .file-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--bg-secondary);
+      margin-bottom: 15px;
+    }
+    
+    .file-upload-area:hover {
+      border-color: var(--accent);
+      background: var(--bg-primary);
+      transform: translateY(-1px);
+    }
+    
+    .file-upload-area.drag-over {
+      border-color: var(--accent);
+      background: var(--bg-primary);
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+    
+    .upload-placeholder {
+      pointer-events: none;
+    }
+    
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+    
+    .upload-placeholder p {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    
+    .upload-placeholder small {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    
+    .import-status {
+      padding: 15px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin: 15px 0;
+    }
+    
+    .status-message {
+      font-weight: 500;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    
+    .import-actions {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .import-preview {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+    
+    .import-preview h4 {
+      font-family: 'Playfair Display', serif;
+      margin-bottom: 15px;
+      color: var(--text-primary);
+    }
+    
+    .preview-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .preview-item {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .preview-item:last-child {
+      border-bottom: none;
+    }
+    
+    .preview-item strong {
+      color: var(--accent);
+      margin-right: 8px;
+      font-weight: 700;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    /* Dark theme support for import styles */
+    [data-theme="dark"] .file-upload-area {
+      background: var(--bg-secondary);
+    }
+    
+    [data-theme="dark"] .file-upload-area:hover {
+      background: var(--bg-primary);
+    }
+    
+    [data-theme="dark"] .import-status,
+    [data-theme="dark"] .import-preview {
+      background: var(--bg-secondary);
+      border-color: var(--border);
+    }
+
+    @media (max-width: 900px) { 
+      .row, .row-3, .row-4, .row-auto { grid-template-columns: 1fr; } 
+      nav.tabs { gap: 8px; }
+      .preview-content { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -213,8 +358,47 @@
       </div>
     </section>
 
-    <!-- Projects List -->
+    <!-- Projects List with Import Functionality (ENHANCED) -->
     <section id="panel-projects" class="panel" role="tabpanel" aria-labelledby="projects">
+      <!-- PROJECT IMPORT SECTION (NEW) -->
+      <div class="card">
+        <div class="card-row">
+          <div><strong>Import Project</strong></div>
+        </div>
+        <p class="muted" style="margin-bottom: 15px;">Upload a JSON project file to automatically populate the form for editing.</p>
+        
+        <div class="import-controls">
+          <div class="file-upload-area" id="file-upload-area">
+            <input type="file" id="project-file-input" accept=".json" style="display: none;">
+            <div class="upload-placeholder" onclick="document.getElementById('project-file-input').click()">
+              <div class="upload-icon">📁</div>
+              <p>Click to select JSON file or drag and drop</p>
+              <small>Supports: .json files up to 10MB</small>
+            </div>
+          </div>
+          
+          <div id="import-status" class="import-status hidden">
+            <div class="status-message"></div>
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+          </div>
+          
+          <div class="import-actions hidden" id="import-actions">
+            <button id="btn-import-project" class="btn btn-primary">Import & Edit Project</button>
+            <button id="btn-cancel-import" class="btn btn-ghost">Cancel</button>
+          </div>
+        </div>
+        
+        <div id="import-preview" class="import-preview hidden">
+          <h4>Project Preview</h4>
+          <div class="preview-content"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- EXISTING PROJECTS LIST -->
       <div class="card">
         <div class="card-row">
           <div><strong>Projects</strong> <span id="projects-count" class="badge">0</span></div>
@@ -518,7 +702,7 @@
           <div class="form-group">
             <label class="label" for="a11y-skip-label">Skip Link Label</label>
             <input id="a11y-skip-label" class="input" placeholder="Skip to content">
-            <div class="hint">Adds a keyboard-accessible “bypass blocks” link.</div>
+            <div class="hint">Adds a keyboard-accessible "bypass blocks" link.</div>
           </div>
           <div class="form-group">
             <label class="label" for="a11y-focus-visible">Force Focus Visible</label>
