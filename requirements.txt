@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+jsonschema
+pydantic
+requests
+beautifulsoup4
+lxml
+urllib3
+python-multipart
