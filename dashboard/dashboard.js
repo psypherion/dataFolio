@@ -1777,4 +1777,3 @@ function init() {
 }
 document.addEventListener("DOMContentLoaded", init);
 
-// for missed commit msg
