@@ -60,6 +60,10 @@ let state = {
 
 let editIndex = null; // current project edit index
 
+// ========== PROJECT IMPORT VARIABLES (NEW) ==========
+let importedProject = null;
+let isImportMode = false;
+
 // ---------------- Utilities ----------------
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
@@ -158,6 +162,285 @@ function setTheme(theme) {
   } else {
     document.body.removeAttribute("data-theme");
   }
+}
+
+// ========== PROJECT IMPORT FUNCTIONALITY (NEW) ==========
+
+function setupProjectImport() {
+  const fileInput = $("#project-file-input");
+  const uploadArea = $("#file-upload-area");
+  const importStatus = $("#import-status");
+  const importActions = $("#import-actions");
+  const importPreview = $("#import-preview");
+  
+  if (!fileInput || !uploadArea) return;
+  
+  // File input change handler
+  fileInput.addEventListener('change', handleFileSelect);
+  
+  // Drag and drop functionality
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('drag-over');
+  });
+  
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('drag-over');
+  });
+  
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('drag-over');
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0 && files[0].name.endsWith('.json')) {
+      fileInput.files = e.dataTransfer.files;
+      handleFileSelect();
+    } else {
+      toast("Please upload a JSON file", "error");
+    }
+  });
+  
+  // Import actions
+  const importBtn = $("#btn-import-project");
+  const cancelBtn = $("#btn-cancel-import");
+  
+  if (importBtn) importBtn.addEventListener('click', importProject);
+  if (cancelBtn) cancelBtn.addEventListener('click', cancelImport);
+}
+
+async function handleFileSelect() {
+  const fileInput = $("#project-file-input");
+  const file = fileInput.files[0];
+  
+  if (!file) return;
+  
+  if (!file.name.endsWith('.json')) {
+    toast("Please select a JSON file", "error");
+    return;
+  }
+  
+  if (file.size > 10 * 1024 * 1024) { // 10MB limit
+    toast("File size must be less than 10MB", "error");
+    return;
+  }
+  
+  showImportStatus("Uploading and parsing file...", 0);
+  
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch('/api/projects/import', {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Upload failed');
+    }
+    
+    const result = await response.json();
+    importedProject = result.project;
+    
+    showImportStatus("File processed successfully!", 100);
+    displayImportPreview(result.project, result.filename);
+    showImportActions();
+    
+  } catch (error) {
+    console.error('Import error:', error);
+    toast(`Import failed: ${error.message}`, "error");
+    hideImportStatus();
+  }
+}
+
+function showImportStatus(message, progress) {
+  const status = $("#import-status");
+  if (!status) return;
+  
+  const messageEl = status.querySelector('.status-message');
+  const progressFill = status.querySelector('.progress-fill');
+  
+  if (messageEl) messageEl.textContent = message;
+  if (progressFill) progressFill.style.width = `${progress}%`;
+  status.classList.remove('hidden');
+}
+
+function hideImportStatus() {
+  const status = $("#import-status");
+  if (status) status.classList.add('hidden');
+}
+
+function showImportActions() {
+  const actions = $("#import-actions");
+  if (actions) actions.classList.remove('hidden');
+}
+
+function displayImportPreview(project, filename) {
+  const preview = $("#import-preview");
+  if (!preview) return;
+  
+  const content = preview.querySelector('.preview-content');
+  if (!content) return;
+  
+  content.innerHTML = `
+    <div class="preview-item">
+      <strong>File:</strong> ${filename}
+    </div>
+    <div class="preview-item">
+      <strong>Title:</strong> ${project.title || 'Untitled'}
+    </div>
+    <div class="preview-item">
+      <strong>Category:</strong> ${project.meta?.category || 'N/A'}
+    </div>
+    <div class="preview-item">
+      <strong>Status:</strong> ${project.meta?.status || 'N/A'}
+    </div>
+    <div class="preview-item">
+      <strong>Summary:</strong> ${truncateText(project.summary || '', 150)}
+    </div>
+    <div class="preview-item">
+      <strong>Tech Specs:</strong> ${project.techSpecs?.items?.length || 0} items
+    </div>
+    <div class="preview-item">
+      <strong>Media Tabs:</strong> ${project.media?.tabs?.length || 0} tabs
+    </div>
+    <div class="preview-item">
+      <strong>Content Sections:</strong> ${project.content?.length || 0} paragraphs
+    </div>
+  `;
+  
+  preview.classList.remove('hidden');
+}
+
+function truncateText(text, maxLength) {
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+function importProject() {
+  if (!importedProject) {
+    toast("No project data to import", "error");
+    return;
+  }
+  
+  try {
+    // Populate the project form with imported data
+    populateProjectForm(importedProject);
+    
+    // Set import mode
+    isImportMode = true;
+    editIndex = null; // New project
+    
+    // Switch to project editor tab
+    const editorTab = $(".tab-btn[data-tab='project-editor']");
+    if (editorTab) editorTab.click();
+    
+    // Update UI
+    const formTitle = $("#pe-title");
+    if (formTitle) formTitle.textContent = 'Imported Project (Edit & Save)';
+    
+    toast("Project imported successfully! Please review and save.", "success");
+    
+    // Clear import UI
+    clearImportUI();
+    
+  } catch (error) {
+    console.error('Error populating form:', error);
+    toast("Error importing project data", "error");
+  }
+}
+
+function populateProjectForm(project) {
+  // Basic fields
+  const fields = {
+    'pr-id': project.id || '',
+    'pr-title': project.title || '',
+    'pr-category': project.meta?.category || '',
+    'pr-status': project.meta?.status || '',
+    'pr-date': project.meta?.date || '',
+    'pr-summary': project.summary || '',
+    'pr-role': project.caseStudy?.role || '',
+    'pr-resp': arrayToLines(project.caseStudy?.responsibilities || []),
+    'pr-featured': project.featured ? 'true' : 'false'
+  };
+  
+  // Populate basic fields
+  Object.entries(fields).forEach(([id, value]) => {
+    const element = $(`#${id}`);
+    if (element) element.value = value;
+  });
+  
+  // Case study fields
+  if (project.caseStudy) {
+    const caseFields = {
+      'pr-problem': project.caseStudy.problem || '',
+      'pr-approach': project.caseStudy.approach || '',
+      'pr-impact': project.caseStudy.impact || '',
+      'pr-outcomes': arrayToLines(project.caseStudy.outcomes || [])
+    };
+    
+    Object.entries(caseFields).forEach(([id, value]) => {
+      const element = $(`#${id}`);
+      if (element) element.value = value;
+    });
+  }
+  
+  // Tech specs
+  if (project.techSpecs) {
+    const techTitle = $("#pr-tech-title");
+    const techItems = $("#pr-tech-items");
+    if (techTitle) techTitle.value = project.techSpecs.title || '';
+    if (techItems) techItems.value = arrayToLines(project.techSpecs.items || []);
+  }
+  
+  // Content paragraphs
+  if (project.content) {
+    const contentEl = $("#pr-content");
+    if (contentEl) contentEl.value = arrayToLines(project.content);
+  }
+  
+  // Links
+  if (project.links) {
+    const linkFields = {
+      'pr-link-github': project.links.github || '',
+      'pr-link-demo': project.links.demo || '',
+      'pr-link-paper': project.links.paper || ''
+    };
+    
+    Object.entries(linkFields).forEach(([id, value]) => {
+      const element = $(`#${id}`);
+      if (element) element.value = value;
+    });
+  }
+  
+  // Media tabs (simplified - populate media list)
+  if (project.media?.tabs) {
+    const mediaList = $("#media-list");
+    if (mediaList) {
+      mediaList.innerHTML = "";
+      project.media.tabs.forEach(addMediaFormFromData);
+      updateMediaCount();
+    }
+  }
+}
+
+function cancelImport() {
+  clearImportUI();
+  importedProject = null;
+  isImportMode = false;
+}
+
+function clearImportUI() {
+  const fileInput = $("#project-file-input");
+  const importStatus = $("#import-status");
+  const importActions = $("#import-actions");
+  const importPreview = $("#import-preview");
+  
+  if (fileInput) fileInput.value = '';
+  if (importStatus) importStatus.classList.add('hidden');
+  if (importActions) importActions.classList.add('hidden');
+  if (importPreview) importPreview.classList.add('hidden');
 }
 
 // ---------------- Tabs ----------------
@@ -1356,7 +1639,7 @@ function renderAcademics() {
       };
     }
   }
-} // end renderAcademics
+}
 
 // ---------------- Settings (Accessibility & Performance) ----------------
 function renderSettings() {
@@ -1402,13 +1685,12 @@ function bindJSONManager() {
 
   $("#btn-upload-json").onclick = () => $("#file-json").click();
   
-  // FIXED: File input handler - use files[0] to get the first File object
+  // File input handler - use files[0] to get the first File object
   $("#file-json").addEventListener("change", async (e) => {
     const input = e.target;
-    const file = input && input.files && input.files[0];  // FIX: Use files[0] instead of files
+    const file = input && input.files && input.files[0];
     if (!file) return;
     try {
-      // Modern promise API on Blob/File
       const text = await file.text();
       const data = JSON.parse(text);
       state = data;
@@ -1464,7 +1746,7 @@ function renderAll() {
   $("#json-preview").textContent = JSON.stringify(toJSON(), null, 2);
 }
 
-// ---------------- Init (extended) ----------------
+// ========== INIT WITH PROJECT IMPORT (ENHANCED) ==========
 function init() {
   setupTabs();
   bindPersonalInfo();
@@ -1473,6 +1755,9 @@ function init() {
   bindJSONManager();
   bindBlog();
   bindSettings();
+  
+  // ========== SETUP PROJECT IMPORT (NEW) ==========
+  setupProjectImport();
 
   // Try draft first; optionally load from server if no draft
   if (!loadDraft()) {
