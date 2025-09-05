@@ -1,0 +1,62 @@
+{
+  "personalInfo": {
+    "name": "",
+    "title": "",
+    "mediumProfile": "",
+    "githubProfile": "",
+    "updatedLabel": "",
+    "defaultTheme": "light"
+  },
+  "about": {
+    "tagline": "",
+    "bio": "",
+    "photo": {
+      "src": "",
+      "alt": ""
+    },
+    "cta": {
+      "label": "",
+      "url": ""
+    },
+    "personJSONLD": true
+  },
+  "navigation": [],
+  "sidebar": {
+    "updates": [],
+    "skillsSections": [],
+    "quickLinks": []
+  },
+  "projects": [],
+  "openSource": [],
+  "academics": {
+    "education": [],
+    "exams": [],
+    "internships": []
+  },
+  "blog": {
+    "showOnHomepage": true,
+    "mode": "manual",
+    "cacheMinutes": 15,
+    "manualPosts": [],
+    "normalized": [],
+    "taxonomy": {
+      "categories": [],
+      "tagSuggestions": [],
+      "series": []
+    }
+  },
+  "settings": {
+    "accessibility": {
+      "skipLinkLabel": "Skip to content",
+      "forceFocusVisible": true,
+      "minContrastAA": true,
+      "requireCaptions": false
+    },
+    "performance": {
+      "lazyLoadImagesDefault": true,
+      "responsiveImagesDefault": true,
+      "maxImageWidth": 2560,
+      "deferNonCriticalJS": true
+    }
+  }
+}
