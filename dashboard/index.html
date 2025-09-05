@@ -1,769 +1,676 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Name - AI Engineer & Researcher</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lora:wght@400;500&family=Source+Code+Pro:wght@400&display=swap" rel="stylesheet">
-    <style>
-        /* Previous CSS styles remain the same */
-        :root {
-            --bg-primary: #F8F6F0;
-            --bg-secondary: #FFFFFF;
-            --text-primary: #2C2C2C;
-            --text-secondary: #666666;
-            --text-muted: #999999;
-            --accent: #CC0000;
-            --border: #DDDDDD;
-            --shadow: rgba(0, 0, 0, 0.1);
-        }
-        [data-theme="dark"] {
-            --bg-primary: #1A1A1A;
-            --bg-secondary: #2A2A2A;
-            --text-primary: #F8F6F0;
-            --text-secondary: #CCCCCC;
-            --text-muted: #888888;
-            --accent: #00BFFF;
-            --border: #444444;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Lora', serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            transition: all 0.3s ease;
-        }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        /* Masthead and existing styles... (keeping previous masthead CSS) */
-        .masthead {
-            border-bottom: 3px solid var(--text-primary);
-            padding: 20px 0;
-            background-color: var(--bg-secondary);
-            box-shadow: 0 2px 10px var(--shadow);
-        }
-        .masthead-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .newspaper-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 3rem;
-            font-weight: 900;
-            text-align: center;
-            letter-spacing: 2px;
-            color: var(--text-primary);
-        }
-        .tagline {
-            text-align: center;
-            font-style: italic;
-            color: var(--text-secondary);
-            margin-top: 5px;
-        }
-        .theme-toggle {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: 'Lora', serif;
-            font-size: 0.9rem;
-            transition: opacity 0.3s ease;
-        }
-        .nav-bar {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border);
-        }
-        .nav-item {
-            font-weight: 500;
-            text-decoration: none;
-            color: var(--text-primary);
-            padding: 5px 10px;
-            border-bottom: 2px solid transparent;
-            transition: border-color 0.3s ease;
-        }
-        .nav-item:hover { border-bottom-color: var(--accent); }
-        /* Main content */
-        .main-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 30px;
-            margin: 30px 0;
-        }
-        .articles-section {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
-        .article {
-            background: var(--bg-secondary);
-            padding: 25px;
-            border: 1px solid var(--border);
-            box-shadow: 0 2px 8px var(--shadow);
-            transition: all 0.3s ease;
-        }
-        .article-headline {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            line-height: 1.2;
-            color: var(--text-primary);
-        }
-        .article-meta {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-            display: flex;
-            gap: 20px;
-        }
-        .article-summary {
-            font-weight: 500;
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            color: var(--text-primary);
-        }
-        /* NEW: Media Gallery Styles */
-        .project-media {
-            margin: 20px 0;
-            break-inside: avoid;
-        }
-        .media-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-        }
-        .media-tab {
-            padding: 8px 16px;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-family: 'Lora', serif;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-        .media-tab.active {
-            color: var(--accent);
-            border-bottom-color: var(--accent);
-        }
-        .media-tab:hover {
-            color: var(--text-primary);
-        }
-        /* Demo Video Styles */
-        .demo-video {
-            margin-bottom: 20px;
-        }
-        .video-container {
-            position: relative;
-            width: 100%;
-            height: 0;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
-            overflow: hidden;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px var(--shadow);
-        }
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        .video-placeholder {
-            position: relative;
-            background: var(--bg-primary);
-            border: 2px dashed var(--border);
-            border-radius: 8px;
-            height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .video-placeholder:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .video-placeholder::before {
-            content: "▶";
-            font-size: 2rem;
-            margin-right: 10px;
-        }
-        /* Image Gallery Styles */
-        .image-gallery {
-            display: none;
-        }
-        .image-gallery.active {
-            display: block;
-        }
-        .gallery-main {
-            margin-bottom: 15px;
-        }
-        .main-image {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px var(--shadow);
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-        .main-image:hover {
-            transform: scale(1.02);
-        }
-        .gallery-thumbnails {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 5px 0;
-        }
-        .thumbnail {
-            width: 80px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 4px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-        .thumbnail:hover,
-        .thumbnail.active {
-            border-color: var(--accent);
-            transform: scale(1.1);
-        }
-        /* Architecture Diagram Styles */
-        .architecture-diagram {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            background: var(--bg-primary);
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-        .architecture-diagram.active {
-            display: block;
-        }
-        .architecture-diagram img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-        }
-        /* Lightbox Styles */
-        .lightbox {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .lightbox.active {
-            display: flex;
-        }
-        .lightbox-content {
-            max-width: 90vw;
-            max-height: 90vh;
-            position: relative;
-        }
-        .lightbox img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-        .lightbox-close {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            color: white;
-            font-size: 2rem;
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-        .lightbox-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            font-size: 2rem;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background 0.3s ease;
-        }
-        .lightbox-nav:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        .lightbox-prev {
-            left: 20px;
-        }
-        .lightbox-next {
-            right: 20px;
-        }
-        .article-content {
-            columns: 1; /* Changed from 2 to accommodate media */
-            text-align: justify;
-        }
-        .tech-specs {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            padding: 15px;
-            margin: 15px 0;
-            break-inside: avoid;
-        }
-        .tech-specs h4 {
-            font-family: 'Playfair Display', serif;
-            margin-bottom: 8px;
-            color: var(--accent);
-            font-size: 1rem;
-        }
-        .tech-list {
-            font-family: 'Source Code Pro', monospace;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-        /* Sidebar styles remain the same */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-        .sidebar-section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            padding: 20px;
-            box-shadow: 0 2px 8px var(--shadow);
-        }
-        .sidebar-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            color: var(--text-primary);
-            border-bottom: 2px solid var(--accent);
-            padding-bottom: 5px;
-        }
-        /* Responsive */
-        @media (max-width: 768px) {
-            .main-content { grid-template-columns: 1fr; }
-            .newspaper-title { font-size: 2rem; }
-            .nav-bar { flex-wrap: wrap; gap: 15px; }
-            .media-tabs { flex-wrap: wrap; }
-            .gallery-thumbnails { justify-content: center; }
-            .main-image { height: 200px; }
-            .lightbox-nav { font-size: 1.5rem; padding: 8px 12px; }
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Name - AI Engineer & Researcher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lora:wght@400;500&family=Source+Code+Pro:wght@400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #F8F6F0;
+      --bg-secondary: #FFFFFF;
+      --text-primary: #2C2C2C;
+      --text-secondary: #666666;
+      --text-muted: #999999;
+      --accent: #CC0000;
+      --border: #DDDDDD;
+      --shadow: rgba(0, 0, 0, 0.1);
+
+      /* Grain controls */
+      --grain-opacity: 0.06;            /* global strength of the grain */
+      --grain-blend: multiply;          /* multiply | soft-light | overlay */
+      --grain-size: 280px;              /* tile size of the SVG texture */
+      --paper-hairline-opacity: 0.04;
+      --vignette-opacity: 0.06;
+    }
+    [data-theme="dark"] {
+      --bg-primary: #1A1A1A;
+      --bg-secondary: #2A2A2A;
+      --text-primary: #F8F6F0;
+      --text-secondary: #CCCCCC;
+      --text-muted: #888888;
+      --accent: #00BFFF;
+      --border: #444444;
+      --shadow: rgba(0,0,0,0.3);
+
+      /* Slightly different texture in dark mode */
+      --grain-opacity: 0.04;
+      --grain-blend: soft-light;
+      --paper-hairline-opacity: 0.03;
+      --vignette-opacity: 0.08;
+    }
+    @media (max-width: 768px) {
+      :root { --grain-size: 360px; }
+    }
+    @media (prefers-contrast: more) {
+      :root { --grain-opacity: 0.03; --paper-hairline-opacity: 0.02; }
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Lora', serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: all 0.3s ease;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    /* Masthead */
+    .masthead {
+      border-bottom: 3px solid var(--text-primary);
+      padding: 20px 0;
+      background-color: var(--bg-secondary);
+      box-shadow: 0 2px 10px var(--shadow);
+      position: relative;
+      z-index: 3;
+    }
+    .masthead-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .newspaper-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      text-align: center;
+      letter-spacing: 2px;
+      color: var(--text-primary);
+    }
+    .tagline {
+      text-align: center;
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-top: 5px;
+    }
+    .actions {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .theme-toggle {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Lora', serif;
+      font-size: 0.9rem;
+      transition: opacity 0.3s ease;
+    }
+    .nav-bar {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+    }
+    .nav-item {
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--text-primary);
+      padding: 5px 10px;
+      border-bottom: 2px solid transparent;
+      transition: border-color 0.3s ease;
+    }
+    .nav-item:hover { border-bottom-color: var(--accent); }
+
+    /* Main content */
+    .main-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+      margin: 30px 0;
+      position: relative;
+      z-index: 2;
+    }
+    .articles-section { display: flex; flex-direction: column; gap: 30px; }
+    .article {
+      background: var(--bg-secondary);
+      padding: 25px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: all 0.3s ease;
+    }
+    .article-headline {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.2;
+      color: var(--text-primary);
+      /* Gentle ink spread */
+      text-shadow: 0 0 0.5px rgba(0,0,0,0.25), 0 0 0.8px rgba(0,0,0,0.15);
+    }
+    .article-meta {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .article-summary {
+      font-weight: 500;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+
+    /* Media system */
+    .project-media { margin: 20px 0; break-inside: avoid; }
+    .media-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .media-tab {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: 'Lora', serif;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+    .media-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .media-tab:hover { color: var(--text-primary); }
+    .demo-video { margin-bottom: 20px; }
+    .video-container {
+      position: relative; width: 100%; height: 0; padding-bottom: 56.25%;
+      overflow: hidden; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow);
+    }
+    .video-container iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%; border: none;
+    }
+    .video-placeholder {
+      position: relative; background: var(--bg-primary); border: 2px dashed var(--border);
+      border-radius: 8px; height: 200px; display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); cursor: pointer; transition: all 0.3s ease;
+    }
+    .video-placeholder:hover { border-color: var(--accent); color: var(--accent); }
+    .video-placeholder::before { content: "▶"; font-size: 2rem; margin-right: 10px; }
+
+    .image-gallery { display: none; }
+    .image-gallery.active { display: block; }
+    .gallery-main { margin-bottom: 15px; }
+    .main-image {
+      width: 100%; height: 300px; object-fit: cover; border-radius: 8px;
+      box-shadow: 0 4px 12px var(--shadow); cursor: pointer; transition: transform 0.3s ease;
+    }
+    .main-image:hover { transform: scale(1.02); }
+    .gallery-thumbnails { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0; }
+    .thumbnail {
+      width: 80px; height: 60px; object-fit: cover; border-radius: 4px; cursor: pointer;
+      border: 2px solid transparent; transition: all 0.3s ease; flex-shrink: 0;
+    }
+    .thumbnail:hover, .thumbnail.active { border-color: var(--accent); transform: scale(1.1); }
+
+    .architecture-diagram { display: none; text-align: center; padding: 20px; background: var(--bg-primary); border-radius: 8px; border: 1px solid var(--border); }
+    .architecture-diagram.active { display: block; }
+    .architecture-diagram img { max-width: 100%; height: auto; border-radius: 4px; }
+
+    /* Lightbox */
+    .lightbox {
+      display: none; position: fixed; z-index: 9999; inset: 0;
+      background: rgba(0, 0, 0, 0.9); justify-content: center; align-items: center; padding: 20px;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox-content { max-width: 90vw; max-height: 90vh; position: relative; }
+    .lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .lightbox-close {
+      position: absolute; top: -40px; right: 0; color: white; font-size: 2rem; cursor: pointer; background: none; border: none;
+    }
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.2); color: white; border: none; font-size: 2rem; padding: 10px 15px;
+      cursor: pointer; border-radius: 4px; transition: background 0.3s ease;
+    }
+    .lightbox-nav:hover { background: rgba(255, 255, 255, 0.3); }
+    .lightbox-prev { left: 20px; } .lightbox-next { right: 20px; }
+
+    .article-content { columns: 1; text-align: justify; }
+    .tech-specs {
+      background: var(--bg-primary); border: 1px solid var(--border); padding: 15px; margin: 15px 0; break-inside: avoid;
+    }
+    .tech-specs h4 { font-family: 'Playfair Display', serif; margin-bottom: 8px; color: var(--accent); font-size: 1rem; }
+    .tech-list { font-family: 'Source Code Pro', monospace; font-size: 0.9rem; color: var(--text-secondary); }
+
+    /* Sidebar */
+    .sidebar { display: flex; flex-direction: column; gap: 25px; }
+    .sidebar-section { background: var(--bg-secondary); border: 1px solid var(--border); padding: 20px; box-shadow: 0 2px 8px var(--shadow); }
+    .sidebar-title {
+      font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: var(--text-primary);
+      border-bottom: 2px solid var(--accent); padding-bottom: 5px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main-content { grid-template-columns: 1fr; }
+      .newspaper-title { font-size: 2rem; }
+      .nav-bar { flex-wrap: wrap; gap: 15px; }
+      .media-tabs { flex-wrap: wrap; }
+      .gallery-thumbnails { justify-content: center; }
+      .main-image { height: 200px; }
+      .lightbox-nav { font-size: 1.5rem; padding: 8px 12px; }
+    }
+
+    /* GRAIN + PAPER OVERLAYS */
+    .grain-overlay {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      opacity: var(--grain-opacity);
+      mix-blend-mode: var(--grain-blend);
+      background-repeat: repeat;
+      background-size: var(--grain-size) var(--grain-size);
+      background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'>\
+  <filter id='n'>\
+    <feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='3' stitchTiles='stitch'/>\
+    <feColorMatrix type='saturate' values='0'/>\
+  </filter>\
+  <rect width='100%' height='100%' filter='url(#n)' opacity='0.9'/>\
+</svg>");
+    }
+    /* Paper hairlines */
+    body::before {
+      content: "";
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        repeating-linear-gradient(90deg, rgba(0,0,0,var(--paper-hairline-opacity)) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(0deg, rgba(0,0,0,calc(var(--paper-hairline-opacity)*0.7)) 0 1px, transparent 1px 4px);
+      mix-blend-mode: soft-light;
+    }
+    /* Vignette */
+    body::after {
+      content: "";
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(110% 80% at 50% 40%, transparent 0 60%, rgba(0,0,0,var(--vignette-opacity)) 100%);
+      mix-blend-mode: multiply;
+    }
+
+    /* Optional: disable all grain layers */
+    .grain-off .grain-overlay,
+    .grain-off body::before,
+    .grain-off body::after { display: none !important; }
+  </style>
 </head>
 <body>
-    <header class="masthead">
-        <div class="container">
-            <div class="masthead-top">
-                <div class="edition-info">
-                    <div id="edition-text">Portfolio</div>
-                    <div style="font-size: 0.8rem;">Updated September 2025</div>
-                </div>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    Switch Theme
-                </button>
-            </div>
-            
-            <h1 class="newspaper-title">YOUR NAME</h1>
-            <div class="tagline">AI Engineer • Systems Programmer • ML Researcher</div>
-            
-            <nav class="nav-bar">
-                <a href="#" class="nav-item">Projects</a>
-                <a href="#" class="nav-item">Research</a>
-                <a href="#" class="nav-item">Blog</a>
-                <a href="#" class="nav-item">Experience</a>
-                <a href="#" class="nav-item">Contact</a>
-            </nav>
+  <header class="masthead">
+    <div class="container">
+      <div class="masthead-top">
+        <div class="edition-info">
+          <div id="edition-text">Portfolio</div>
+          <div style="font-size: 0.8rem;">Updated September 2025</div>
         </div>
-    </header>
-    <main class="container">
-        <div class="main-content">
-            <section class="articles-section">
-                <article class="article">
-                    <h2 class="article-headline">MEC net - Continual Learning Language Model</h2>
-                    <div class="article-meta">
-                        <span>Research Project</span>
-                        <span>In Development</span>
-                        <span>August 2025</span>
-                    </div>
-                    <p class="article-summary">Developing a hippocampal-inspired memory architecture for large language models that addresses catastrophic forgetting through dual memory systems.</p>
-                    
-                    <!-- Project Media Section -->
-                    <div class="project-media">
-                        <div class="media-tabs">
-                            <button class="media-tab active" onclick="switchTab(event, 'mecnet-demo')">Demo Video</button>
-                            <button class="media-tab" onclick="switchTab(event, 'mecnet-gallery')">Screenshots</button>
-                            <button class="media-tab" onclick="switchTab(event, 'mecnet-architecture')">Architecture</button>
-                        </div>
-                        <!-- Demo Video Tab -->
-                        <div id="mecnet-demo" class="demo-video media-content active">
-                            <div class="video-placeholder" onclick="loadVideo(this, 'dQw4w9WgXcQ')">
-                                Click to load demo video - MEC net Training Process
-                            </div>
-                        </div>
-                        <!-- Image Gallery Tab -->
-                        <div id="mecnet-gallery" class="image-gallery media-content">
-                            <div class="gallery-main">
-                                <img src="https://via.placeholder.com/600x300/4A90E2/FFFFFF?text=MEC+net+Training+Dashboard" 
-                                     alt="MEC net Training Dashboard" class="main-image" onclick="openLightbox(0, 'mecnet')">
-                            </div>
-                            <div class="gallery-thumbnails">
-                                <img src="https://via.placeholder.com/80x60/4A90E2/FFFFFF?text=Dashboard" 
-                                     alt="Training Dashboard" class="thumbnail active" onclick="changeImage(0, 'mecnet')">
-                                <img src="https://via.placeholder.com/80x60/50C878/FFFFFF?text=Memory" 
-                                     alt="Memory Visualization" class="thumbnail" onclick="changeImage(1, 'mecnet')">
-                                <img src="https://via.placeholder.com/80x60/FFB347/FFFFFF?text=Results" 
-                                     alt="Results Chart" class="thumbnail" onclick="changeImage(2, 'mecnet')">
-                                <img src="https://via.placeholder.com/80x60/FF6B6B/FFFFFF?text=Interface" 
-                                     alt="User Interface" class="thumbnail" onclick="changeImage(3, 'mecnet')">
-                            </div>
-                        </div>
-                        <!-- Architecture Diagram Tab -->
-                        <div id="mecnet-architecture" class="architecture-diagram media-content">
-                            <img src="https://via.placeholder.com/500x300/2C3E50/FFFFFF?text=MEC+net+Architecture+Diagram" 
-                                 alt="MEC net Architecture" onclick="openLightbox(4, 'mecnet')">
-                            <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary);">
-                                System architecture showing hippocampal-inspired memory components
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="article-content">
-                        <p>I'm building a novel architecture that implements both semantic and episodic memory mechanisms, inspired by neuroscience research on hippocampal memory consolidation. The system maintains performance on previously learned tasks while acquiring new capabilities.</p>
-                        
-                        <div class="tech-specs">
-                            <h4>Technical Implementation</h4>
-                            <div class="tech-list">
-                                • PyTorch, Transformers library<br>
-                                • Custom attention mechanisms<br>
-                                • Memory consolidation algorithms<br>
-                                • Distributed training pipeline<br>
-                                • 90% knowledge retention achieved
-                            </div>
-                        </div>
-                        
-                        <p>The architecture combines fast learning in working memory with gradual consolidation into long-term storage, preventing interference between old and new knowledge. Current benchmarks show significant improvement over baseline transformer models in continual learning scenarios.</p>
-                    </div>
-                </article>
-                <article class="article">
-                    <h2 class="article-headline">Brain MRI Segmentation - Medical AI Application</h2>
-                    <div class="article-meta">
-                        <span>Deep Learning</span>
-                        <span>Healthcare AI</span>
-                        <span>Completed</span>
-                    </div>
-                    <p class="article-summary">Implemented automated brain tumor segmentation system using 3D U-Net architecture, achieving clinical-grade accuracy for medical imaging analysis.</p>
-                    
-                    <!-- Project Media Section -->
-                    <div class="project-media">
-                        <div class="media-tabs">
-                            <button class="media-tab active" onclick="switchTab(event, 'mri-demo')">Demo Video</button>
-                            <button class="media-tab" onclick="switchTab(event, 'mri-gallery')">Results</button>
-                            <button class="media-tab" onclick="switchTab(event, 'mri-architecture')">Model</button>
-                        </div>
-                        <!-- Demo Video -->
-                        <div id="mri-demo" class="demo-video media-content active">
-                            <div class="video-placeholder" onclick="loadVideo(this, 'dQw4w9WgXcQ')">
-                                Click to load demo - Real-time Brain MRI Segmentation
-                            </div>
-                        </div>
-                        <!-- Results Gallery -->
-                        <div id="mri-gallery" class="image-gallery media-content">
-                            <div class="gallery-main">
-                                <img src="https://via.placeholder.com/600x300/8E44AD/FFFFFF?text=MRI+Segmentation+Results" 
-                                     alt="MRI Segmentation Results" class="main-image" onclick="openLightbox(0, 'mri')">
-                            </div>
-                            <div class="gallery-thumbnails">
-                                <img src="https://via.placeholder.com/80x60/8E44AD/FFFFFF?text=Seg1" 
-                                     alt="Segmentation 1" class="thumbnail active" onclick="changeImage(0, 'mri')">
-                                <img src="https://via.placeholder.com/80x60/3498DB/FFFFFF?text=Seg2" 
-                                     alt="Segmentation 2" class="thumbnail" onclick="changeImage(1, 'mri')">
-                                <img src="https://via.placeholder.com/80x60/E74C3C/FFFFFF?text=Acc" 
-                                     alt="Accuracy Chart" class="thumbnail" onclick="changeImage(2, 'mri')">
-                            </div>
-                        </div>
-                        <!-- Model Architecture -->
-                        <div id="mri-architecture" class="architecture-diagram media-content">
-                            <img src="https://via.placeholder.com/500x300/34495E/FFFFFF?text=3D+U-Net+Architecture" 
-                                 alt="3D U-Net Architecture">
-                        </div>
-                    </div>
-                    <div class="article-content">
-                        <p>I developed a deep learning system for automated brain tumor detection and segmentation using medical MRI data. The project involved preprocessing DICOM images, implementing custom data augmentation techniques, and training a modified 3D U-Net architecture.</p>
-                        
-                        <div class="tech-specs">
-                            <h4>Architecture & Performance</h4>
-                            <div class="tech-list">
-                                • 3D U-Net with attention gates<br>
-                                • TensorFlow, SimpleITK<br>
-                                • Data augmentation pipeline<br>
-                                • 94% IoU score achieved<br>
-                                • Validated on 1000+ scans
-                            </div>
-                        </div>
-                    </div>
-                </article>
-                <article class="article">
-                    <h2 class="article-headline">SUR - Multimodal Music Recommendation System</h2>
-                    <div class="article-meta">
-                        <span>Multimodal AI</span>
-                        <span>Production Deployed</span>
-                        <span>July 2025</span>
-                    </div>
-                    <p class="article-summary">Built explainable music recommendation engine combining audio analysis, natural language processing, and user behavior modeling, deployed as Spotitube application.</p>
-                    
-                    <!-- Project Media Section -->
-                    <div class="project-media">
-                        <div class="media-tabs">
-                            <button class="media-tab active" onclick="switchTab(event, 'sur-demo')">App Demo</button>
-                            <button class="media-tab" onclick="switchTab(event, 'sur-gallery')">Interface</button>
-                            <button class="media-tab" onclick="switchTab(event, 'sur-architecture')">System</button>
-                        </div>
-                        <!-- Demo Video -->
-                        <div id="sur-demo" class="demo-video media-content active">
-                            <div class="video-placeholder" onclick="loadVideo(this, 'dQw4w9WgXcQ')">
-                                Click to load demo - Spotitube App Walkthrough
-                            </div>
-                        </div>
-                        <!-- Interface Gallery -->
-                        <div id="sur-gallery" class="image-gallery media-content">
-                            <div class="gallery-main">
-                                <img src="https://via.placeholder.com/600x300/1DB954/FFFFFF?text=Spotitube+Interface" 
-                                     alt="Spotitube Interface" class="main-image" onclick="openLightbox(0, 'sur')">
-                            </div>
-                            <div class="gallery-thumbnails">
-                                <img src="https://via.placeholder.com/80x60/1DB954/FFFFFF?text=Home" 
-                                     alt="Home Screen" class="thumbnail active" onclick="changeImage(0, 'sur')">
-                                <img src="https://via.placeholder.com/80x60/FF1744/FFFFFF?text=Rec" 
-                                     alt="Recommendations" class="thumbnail" onclick="changeImage(1, 'sur')">
-                                <img src="https://via.placeholder.com/80x60/FF9800/FFFFFF?text=Play" 
-                                     alt="Player" class="thumbnail" onclick="changeImage(2, 'sur')">
-                            </div>
-                        </div>
-                        <!-- System Architecture -->
-                        <div id="sur-architecture" class="architecture-diagram media-content">
-                            <img src="https://via.placeholder.com/500x300/795548/FFFFFF?text=Multimodal+AI+System" 
-                                 alt="SUR System Architecture">
-                        </div>
-                    </div>
-                    <div class="article-content">
-                        <div class="tech-specs">
-                            <h4>System Components</h4>
-                            <div class="tech-list">
-                                • Audio feature extraction (librosa)<br>
-                                • NLP for lyric analysis<br>
-                                • Collaborative filtering<br>
-                                • Spotify API integration<br>
-                                • YouTube streaming (yt-dlp)
-                            </div>
-                        </div>
-                        
-                        <p>The explainability module uses attention mechanisms to highlight which features drove specific recommendations. Users can understand why songs were suggested based on acoustic similarity, lyrical themes, or listening context.</p>
-                    </div>
-                </article>
-            </section>
-            <aside class="sidebar">
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">Latest Updates</h3>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">Sept 1, 2025</div>
-                            <div style="font-weight: 500;">Started NeetCode 150 challenge</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">Aug 30, 2025</div>
-                            <div style="font-weight: 500;">MEC net memory consolidation working</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">Aug 28, 2025</div>
-                            <div style="font-weight: 500;">Spotitube production deployment</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">Technical Skills</h3>
-                    <div style="display: grid; gap: 8px; font-family: 'Source Code Pro', monospace; font-size: 0.9rem;">
-                        <div><strong>Languages:</strong> Python, C, JavaScript, SQL</div>
-                        <div><strong>ML/DL:</strong> PyTorch, TensorFlow, scikit-learn</div>
-                        <div><strong>Computer Vision:</strong> OpenCV, PIL, SimpleITK</div>
-                        <div><strong>NLP:</strong> Transformers, spaCy, NLTK</div>
-                    </div>
-                </div>
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">Quick Links</h3>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <a href="#" style="color: var(--accent); text-decoration: none;">📊 All Projects</a>
-                        <a href="#" style="color: var(--accent); text-decoration: none;">💻 GitHub</a>
-                        <a href="#" style="color: var(--accent); text-decoration: none;">📝 Technical Blog</a>
-                        <a href="#" style="color: var(--accent); text-decoration: none;">📄 Resume PDF</a>
-                    </div>
-                </div>
-            </aside>
+        <div class="actions">
+          <button class="theme-toggle" onclick="toggleTheme()">Switch Theme</button>
+          <button class="theme-toggle" onclick="toggleGrain()">Toggle Grain</button>
         </div>
-    </main>
-    <!-- Lightbox Modal -->
-    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-        <div class="lightbox-content" onclick="event.stopPropagation()">
-            <button class="lightbox-close" onclick="closeLightbox()">×</button>
-            <button class="lightbox-nav lightbox-prev" onclick="lightboxPrev()">‹</button>
-            <img id="lightbox-image" src="" alt="">
-            <button class="lightbox-nav lightbox-next" onclick="lightboxNext()">›</button>
-        </div>
+      </div>
+
+      <h1 class="newspaper-title">YOUR NAME</h1>
+      <div class="tagline">AI Engineer • Systems Programmer • ML Researcher</div>
+
+      <nav class="nav-bar">
+        <a href="#" class="nav-item">Projects</a>
+        <a href="#" class="nav-item">Research</a>
+        <a href="#" class="nav-item">Blog</a>
+        <a href="#" class="nav-item">Experience</a>
+        <a href="#" class="nav-item">Contact</a>
+      </nav>
     </div>
-    <script>
-        // Image galleries data
-        const galleries = {
-            mecnet: [
-                { src: 'https://via.placeholder.com/600x300/4A90E2/FFFFFF?text=MEC+net+Training+Dashboard', alt: 'Training Dashboard' },
-                { src: 'https://via.placeholder.com/600x300/50C878/FFFFFF?text=Memory+Visualization', alt: 'Memory Visualization' },
-                { src: 'https://via.placeholder.com/600x300/FFB347/FFFFFF?text=Results+Chart', alt: 'Results Chart' },
-                { src: 'https://via.placeholder.com/600x300/FF6B6B/FFFFFF?text=User+Interface', alt: 'User Interface' },
-                { src: 'https://via.placeholder.com/600x300/2C3E50/FFFFFF?text=Architecture+Diagram', alt: 'Architecture Diagram' }
-            ],
-            mri: [
-                { src: 'https://via.placeholder.com/600x300/8E44AD/FFFFFF?text=MRI+Segmentation+Results', alt: 'Segmentation Results' },
-                { src: 'https://via.placeholder.com/600x300/3498DB/FFFFFF?text=Before+After+Comparison', alt: 'Before/After Comparison' },
-                { src: 'https://via.placeholder.com/600x300/E74C3C/FFFFFF?text=Accuracy+Metrics', alt: 'Accuracy Chart' }
-            ],
-            sur: [
-                { src: 'https://via.placeholder.com/600x300/1DB954/FFFFFF?text=Spotitube+Home+Screen', alt: 'Home Screen' },
-                { src: 'https://via.placeholder.com/600x300/FF1744/FFFFFF?text=Recommendation+Engine', alt: 'Recommendations' },
-                { src: 'https://via.placeholder.com/600x300/FF9800/FFFFFF?text=Music+Player', alt: 'Music Player' }
-            ]
-        };
-        let currentGallery = '';
-        let currentImageIndex = 0;
-        function toggleTheme() {
-            const body = document.body;
-            const themeToggle = document.querySelector('.theme-toggle');
-            
-            if (body.getAttribute('data-theme') === 'dark') {
-                body.removeAttribute('data-theme');
-                themeToggle.textContent = 'Dark Mode';
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = 'Light Mode';
-            }
-        }
-        function switchTab(event, tabId) {
-            // Remove active class from all tabs and content
-            const article = event.target.closest('.article');
-            const tabs = article.querySelectorAll('.media-tab');
-            const contents = article.querySelectorAll('.media-content');
-            
-            tabs.forEach(tab => tab.classList.remove('active'));
-            contents.forEach(content => content.classList.remove('active'));
-            
-            // Add active class to clicked tab and corresponding content
-            event.target.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-        }
-        function loadVideo(element, videoId) {
-            const iframe = document.createElement('iframe');
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-            iframe.setAttribute('allowfullscreen', '');
-            
-            const container = document.createElement('div');
-            container.className = 'video-container';
-            container.appendChild(iframe);
-            
-            element.parentNode.replaceChild(container, element);
-        }
-        function changeImage(index, gallery) {
-            const galleryElement = document.getElementById(`${gallery}-gallery`);
-            const mainImage = galleryElement.querySelector('.main-image');
-            const thumbnails = galleryElement.querySelectorAll('.thumbnail');
-            
-            // Update main image
-            mainImage.src = galleries[gallery][index].src;
-            mainImage.alt = galleries[gallery][index].alt;
-            
-            // Update active thumbnail
-            thumbnails.forEach((thumb, i) => {
-                thumb.classList.toggle('active', i === index);
-            });
-        }
-        function openLightbox(index, gallery) {
-            currentGallery = gallery;
-            currentImageIndex = index;
-            
-            const lightbox = document.getElementById('lightbox');
-            const lightboxImage = document.getElementById('lightbox-image');
-            
-            lightboxImage.src = galleries[gallery][index].src;
-            lightboxImage.alt = galleries[gallery][index].alt;
-            
-            lightbox.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-        function closeLightbox() {
-            const lightbox = document.getElementById('lightbox');
-            lightbox.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-        function lightboxPrev() {
-            if (currentImageIndex > 0) {
-                currentImageIndex--;
-                const lightboxImage = document.getElementById('lightbox-image');
-                lightboxImage.src = galleries[currentGallery][currentImageIndex].src;
-                lightboxImage.alt = galleries[currentGallery][currentImageIndex].alt;
-            }
-        }
-        function lightboxNext() {
-            if (currentImageIndex < galleries[currentGallery].length - 1) {
-                currentImageIndex++;
-                const lightboxImage = document.getElementById('lightbox-image');
-                lightboxImage.src = galleries[currentGallery][currentImageIndex].src;
-                lightboxImage.alt = galleries[currentGallery][currentImageIndex].alt;
-            }
-        }
-        // Keyboard navigation for lightbox
-        document.addEventListener('keydown', function(e) {
-            if (document.getElementById('lightbox').classList.contains('active')) {
-                if (e.key === 'Escape') closeLightbox();
-                if (e.key === 'ArrowLeft') lightboxPrev();
-                if (e.key === 'ArrowRight') lightboxNext();
-            }
-        });
-        // Smooth hover effects for articles
-        document.querySelectorAll('.article').forEach(article => {
-            article.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 6px 20px var(--shadow)';
-            });
-            
-            article.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = '0 2px 8px var(--shadow)';
-            });
-        });
-    </script>
+  </header>
+
+  <main class="container">
+    <div class="main-content">
+      <section class="articles-section">
+        <!-- Article 1 -->
+        <article class="article">
+          <h2 class="article-headline">MEC net - Continual Learning Language Model</h2>
+          <div class="article-meta">
+            <span>Research Project</span>
+            <span>In Development</span>
+            <span>August 2025</span>
+          </div>
+          <p class="article-summary">Developing a hippocampal-inspired memory architecture for large language models that addresses catastrophic forgetting through dual memory systems.</p>
+
+          <div class="project-media">
+            <div class="media-tabs">
+              <button class="media-tab active" onclick="switchTab(event, 'mecnet-demo')">Demo Video</button>
+              <button class="media-tab" onclick="switchTab(event, 'mecnet-gallery')">Screenshots</button>
+              <button class="media-tab" onclick="switchTab(event, 'mecnet-architecture')">Architecture</button>
+            </div>
+            <!-- Demo Video -->
+            <div id="mecnet-demo" class="demo-video media-content active">
+              <div class="video-placeholder" onclick="loadVideo(this, 'dQw4w9WgXcQ')">
+                Click to load demo video - MEC net Training Process
+              </div>
+            </div>
+            <!-- Gallery -->
+            <div id="mecnet-gallery" class="image-gallery media-content">
+              <div class="gallery-main">
+                <img src="https://via.placeholder.com/600x300/4A90E2/FFFFFF?text=MEC+net+Training+Dashboard"
+                     alt="MEC net Training Dashboard" class="main-image" onclick="openLightbox(0, 'mecnet')">
+              </div>
+              <div class="gallery-thumbnails">
+                <img src="https://via.placeholder.com/80x60/4A90E2/FFFFFF?text=Dashboard"
+                     alt="Training Dashboard" class="thumbnail active" onclick="changeImage(0, 'mecnet')">
+                <img src="https://via.placeholder.com/80x60/50C878/FFFFFF?text=Memory"
+                     alt="Memory Visualization" class="thumbnail" onclick="changeImage(1, 'mecnet')">
+                <img src="https://via.placeholder.com/80x60/FFB347/FFFFFF?text=Results"
+                     alt="Results Chart" class="thumbnail" onclick="changeImage(2, 'mecnet')">
+                <img src="https://via.placeholder.com/80x60/FF6B6B/FFFFFF?text=Interface"
+                     alt="User Interface" class="thumbnail" onclick="changeImage(3, 'mecnet')">
+              </div>
+            </div>
+            <!-- Diagram -->
+            <div id="mecnet-architecture" class="architecture-diagram media-content">
+              <img src="https://via.placeholder.com/500x300/2C3E50/FFFFFF?text=MEC+net+Architecture+Diagram"
+                   alt="MEC net Architecture" onclick="openLightbox(4, 'mecnet')">
+              <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary);">
+                System architecture showing hippocampal-inspired memory components
+              </p>
+            </div>
+          </div>
+
+          <div class="article-content">
+            <p>I'm building a novel architecture that implements both semantic and episodic memory mechanisms, inspired by neuroscience research on hippocampal memory consolidation. The system maintains performance on previously learned tasks while acquiring new capabilities.</p>
+            <div class="tech-specs">
+              <h4>Technical Implementation</h4>
+              <div class="tech-list">
+                • PyTorch, Transformers library<br>
+                • Custom attention mechanisms<br>
+                • Memory consolidation algorithms<br>
+                • Distributed training pipeline<br>
+                • 90% knowledge retention achieved
+              </div>
+            </div>
+            <p>The architecture combines fast learning in working memory with gradual consolidation into long-term storage, preventing interference between old and new knowledge. Current benchmarks show significant improvement over baseline transformer models in continual learning scenarios.</p>
+          </div>
+        </article>
+
+        <!-- Article 2 -->
+        <article class="article">
+          <h2 class="article-headline">Brain MRI Segmentation - Medical AI Application</h2>
+          <div class="article-meta">
+            <span>Deep Learning</span>
+            <span>Healthcare AI</span>
+            <span>Completed</span>
+          </div>
+          <p class="article-summary">Implemented automated brain tumor segmentation system using 3D U-Net architecture, achieving clinical-grade accuracy for medical imaging analysis.</p>
+
+          <div class="project-media">
+            <div class="media-tabs">
+              <button class="media-tab active" onclick="switchTab(event, 'mri-demo')">Demo Video</button>
+              <button class="media-tab" onclick="switchTab(event, 'mri-gallery')">Results</button>
+              <button class="media-tab" onclick="switchTab(event, 'mri-architecture')">Model</button>
+            </div>
+            <div id="mri-demo" class="demo-video media-content active">
+              <div class="video-placeholder" onclick="loadVideo(this, 'dQw4w9WgXcQ')">
+                Click to load demo - Real-time Brain MRI Segmentation
+              </div>
+            </div>
+            <div id="mri-gallery" class="image-gallery media-content">
+              <div class="gallery-main">
+                <img src="https://via.placeholder.com/600x300/8E44AD/FFFFFF?text=MRI+Segmentation+Results"
+                     alt="MRI Segmentation Results" class="main-image" onclick="openLightbox(0, 'mri')">
+              </div>
+              <div class="gallery-thumbnails">
+                <img src="https://via.placeholder.com/80x60/8E44AD/FFFFFF?text=Seg1"
+                     alt="Segmentation 1" class="thumbnail active" onclick="changeImage(0, 'mri')">
+                <img src="https://via.placeholder.com/80x60/3498DB/FFFFFF?text=Seg2"
+                     alt="Segmentation 2" class="thumbnail" onclick="changeImage(1, 'mri')">
+                <img src="https://via.placeholder.com/80x60/E74C3C/FFFFFF?text=Acc"
+                     alt="Accuracy Chart" class="thumbnail" onclick="changeImage(2, 'mri')">
+              </div>
+            </div>
+            <div id="mri-architecture" class="architecture-diagram media-content">
+              <img src="https://via.placeholder.com/500x300/34495E/FFFFFF?text=3D+U-Net+Architecture"
+                   alt="3D U-Net Architecture">
+            </div>
+          </div>
+
+          <div class="article-content">
+            <p>I developed a deep learning system for automated brain tumor detection and segmentation using medical MRI data. The project involved preprocessing DICOM images, implementing custom data augmentation techniques, and training a modified 3D U-Net architecture.</p>
+            <div class="tech-specs">
+              <h4>Architecture & Performance</h4>
+              <div class="tech-list">
+                • 3D U-Net with attention gates<br>
+                • TensorFlow, SimpleITK<br>
+                • Data augmentation pipeline<br>
+                • 94% IoU score achieved<br>
+                • Validated on 1000+ scans
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Article 3 -->
+        <article class="article">
+          <h2 class="article-headline">SUR - Multimodal Music Recommendation System</h2>
+          <div class="article-meta">
+            <span>Multimodal AI</span>
+            <span>Production Deployed</span>
+            <span>July 2025</span>
+          </div>
+          <p class="article-summary">Built explainable music recommendation engine combining audio analysis, natural language processing, and user behavior modeling, deployed as Spotitube application.</p>
+
+          <div class="project-media">
+            <div class="media-tabs">
+              <button class="media-tab active" onclick="switchTab(event, 'sur-demo')">App Demo</button>
+              <button class="media-tab" onclick="switchTab(event, 'sur-gallery')">Interface</button>
+              <button class="media-tab" onclick="switchTab(event, 'sur-architecture')">System</button>
+            </div>
+            <div id="sur-demo" class="demo-video media-content active">
+              <div class="video-placeholder" onclick="loadVideo(this, 'dQw4w9WgXcQ')">
+                Click to load demo - Spotitube App Walkthrough
+              </div>
+            </div>
+            <div id="sur-gallery" class="image-gallery media-content">
+              <div class="gallery-main">
+                <img src="https://via.placeholder.com/600x300/1DB954/FFFFFF?text=Spotitube+Interface"
+                     alt="Spotitube Interface" class="main-image" onclick="openLightbox(0, 'sur')">
+              </div>
+              <div class="gallery-thumbnails">
+                <img src="https://via.placeholder.com/80x60/1DB954/FFFFFF?text=Home"
+                     alt="Home Screen" class="thumbnail active" onclick="changeImage(0, 'sur')">
+                <img src="https://via.placeholder.com/80x60/FF1744/FFFFFF?text=Rec"
+                     alt="Recommendations" class="thumbnail" onclick="changeImage(1, 'sur')">
+                <img src="https://via.placeholder.com/80x60/FF9800/FFFFFF?text=Play"
+                     alt="Player" class="thumbnail" onclick="changeImage(2, 'sur')">
+              </div>
+            </div>
+            <div id="sur-architecture" class="architecture-diagram media-content">
+              <img src="https://via.placeholder.com/500x300/795548/FFFFFF?text=Multimodal+AI+System"
+                   alt="SUR System Architecture">
+            </div>
+          </div>
+
+          <div class="article-content">
+            <div class="tech-specs">
+              <h4>System Components</h4>
+              <div class="tech-list">
+                • Audio feature extraction (librosa)<br>
+                • NLP for lyric analysis<br>
+                • Collaborative filtering<br>
+                • Spotify API integration<br>
+                • YouTube streaming (yt-dlp)
+              </div>
+            </div>
+            <p>The explainability module uses attention mechanisms to highlight which features drove specific recommendations. Users can understand why songs were suggested based on acoustic similarity, lyrical themes, or listening context.</p>
+          </div>
+        </article>
+      </section>
+
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Latest Updates</h3>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Sept 1, 2025</div>
+              <div style="font-weight: 500;">Started NeetCode 150 challenge</div>
+            </div>
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Aug 30, 2025</div>
+              <div style="font-weight: 500;">MEC net memory consolidation working</div>
+            </div>
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Aug 28, 2025</div>
+              <div style="font-weight: 500;">Spotitube production deployment</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Technical Skills</h3>
+          <div style="display: grid; gap: 8px; font-family: 'Source Code Pro', monospace; font-size: 0.9rem;">
+            <div><strong>Languages:</strong> Python, C, JavaScript, SQL</div>
+            <div><strong>ML/DL:</strong> PyTorch, TensorFlow, scikit-learn</div>
+            <div><strong>Computer Vision:</strong> OpenCV, PIL, SimpleITK</div>
+            <div><strong>NLP:</strong> Transformers, spaCy, NLTK</div>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Quick Links</h3>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="#" style="color: var(--accent); text-decoration: none;">📊 All Projects</a>
+            <a href="#" style="color: var(--accent); text-decoration: none;">💻 GitHub</a>
+            <a href="#" style="color: var(--accent); text-decoration: none;">📝 Technical Blog</a>
+            <a href="#" style="color: var(--accent); text-decoration: none;">📄 Resume PDF</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Lightbox Modal -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+      <button class="lightbox-close" onclick="closeLightbox()">×</button>
+      <button class="lightbox-nav lightbox-prev" onclick="lightboxPrev()">‹</button>
+      <img id="lightbox-image" src="" alt="">
+      <button class="lightbox-nav lightbox-next" onclick="lightboxNext()">›</button>
+    </div>
+  </div>
+
+  <!-- Grain overlay (noise texture) -->
+  <div class="grain-overlay" aria-hidden="true"></div>
+
+  <script>
+    // Image galleries data
+    const galleries = {
+      mecnet: [
+        { src: 'https://via.placeholder.com/600x300/4A90E2/FFFFFF?text=MEC+net+Training+Dashboard', alt: 'Training Dashboard' },
+        { src: 'https://via.placeholder.com/600x300/50C878/FFFFFF?text=Memory+Visualization', alt: 'Memory Visualization' },
+        { src: 'https://via.placeholder.com/600x300/FFB347/FFFFFF?text=Results+Chart', alt: 'Results Chart' },
+        { src: 'https://via.placeholder.com/600x300/FF6B6B/FFFFFF?text=User+Interface', alt: 'User Interface' },
+        { src: 'https://via.placeholder.com/600x300/2C3E50/FFFFFF?text=Architecture+Diagram', alt: 'Architecture Diagram' }
+      ],
+      mri: [
+        { src: 'https://via.placeholder.com/600x300/8E44AD/FFFFFF?text=MRI+Segmentation+Results', alt: 'Segmentation Results' },
+        { src: 'https://via.placeholder.com/600x300/3498DB/FFFFFF?text=Before+After+Comparison', alt: 'Before/After Comparison' },
+        { src: 'https://via.placeholder.com/600x300/E74C3C/FFFFFF?text=Accuracy+Metrics', alt: 'Accuracy Chart' }
+      ],
+      sur: [
+        { src: 'https://via.placeholder.com/600x300/1DB954/FFFFFF?text=Spotitube+Home+Screen', alt: 'Home Screen' },
+        { src: 'https://via.placeholder.com/600x300/FF1744/FFFFFF?text=Recommendation+Engine', alt: 'Recommendations' },
+        { src: 'https://via.placeholder.com/600x300/FF9800/FFFFFF?text=Music+Player', alt: 'Music Player' }
+      ]
+    };
+    let currentGallery = '';
+    let currentImageIndex = 0;
+
+    function toggleTheme() {
+      const body = document.body;
+      const themeBtn = document.querySelector('.actions .theme-toggle');
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        body.removeAttribute('data-theme');
+        themeBtn.textContent = 'Switch Theme';
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        themeBtn.textContent = 'Switch Theme';
+      }
+    }
+    function toggleGrain() {
+      document.documentElement.classList.toggle('grain-off');
+    }
+    function switchTab(event, tabId) {
+      const article = event.target.closest('.article');
+      const tabs = article.querySelectorAll('.media-tab');
+      const contents = article.querySelectorAll('.media-content');
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+    function loadVideo(element, videoId) {
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      iframe.setAttribute('allowfullscreen', '');
+      const container = document.createElement('div');
+      container.className = 'video-container';
+      container.appendChild(iframe);
+      element.parentNode.replaceChild(container, element);
+    }
+    function changeImage(index, gallery) {
+      const galleryElement = document.getElementById(`${gallery}-gallery`);
+      const mainImage = galleryElement.querySelector('.main-image');
+      const thumbnails = galleryElement.querySelectorAll('.thumbnail');
+      mainImage.src = galleries[gallery][index].src;
+      mainImage.alt = galleries[gallery][index].alt;
+      thumbnails.forEach((thumb, i) => thumb.classList.toggle('active', i === index));
+    }
+    function openLightbox(index, gallery) {
+      currentGallery = gallery;
+      currentImageIndex = index;
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImage = document.getElementById('lightbox-image');
+      lightboxImage.src = galleries[gallery][index].src;
+      lightboxImage.alt = galleries[gallery][index].alt;
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+    function lightboxPrev() {
+      if (currentImageIndex > 0) {
+        currentImageIndex--;
+        const img = document.getElementById('lightbox-image');
+        img.src = galleries[currentGallery][currentImageIndex].src;
+        img.alt = galleries[currentGallery][currentImageIndex].alt;
+      }
+    }
+    function lightboxNext() {
+      if (currentImageIndex < galleries[currentGallery].length - 1) {
+        currentImageIndex++;
+        const img = document.getElementById('lightbox-image');
+        img.src = galleries[currentGallery][currentImageIndex].src;
+        img.alt = galleries[currentGallery][currentImageIndex].alt;
+      }
+    }
+    // Hover polish
+    document.querySelectorAll('.article').forEach(article => {
+      article.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 6px 20px var(--shadow)';
+      });
+      article.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 8px var(--shadow)';
+      });
+    });
+  </script>
 </body>
 </html>
-"""
-it follows a newspaper aesthetic
