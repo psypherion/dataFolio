@@ -1,5 +1,6 @@
 # app/main.py
-from fastapi import FastAPI, HTTPException, Query
+
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -74,6 +75,7 @@ def get_config():
             }
         }
         return JSONResponse(content=default_config)  # Return base schema-aligned defaults [1]
+
     with open(DATA_PATH, "r", encoding="utf-8") as f:
         return JSONResponse(content=json.load(f))  # Serve current configuration [1]
 
@@ -85,22 +87,94 @@ def put_config(payload: ConfigPayload):
     # Load schema
     if not os.path.exists(SCHEMA_PATH):
         raise HTTPException(status_code=500, detail="Schema not found on server")  # Ensure server schema present [1]
+    
     with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
         schema = json.load(f)
+    
     # Validate
     try:
         validate(instance=payload.data, schema=schema)  # jsonschema validation against draft-07 [13]
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=f"Schema validation error: {e.message}")  # Structured schema error [13]
+    
     # Persist atomically
     os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
     tmp_path = DATA_PATH + ".tmp"
     with open(tmp_path, "w", encoding="utf-8") as f:
         json.dump(payload.data, f, ensure_ascii=False, indent=2)
     os.replace(tmp_path, DATA_PATH)
+    
     return {"status": "ok"}  # Success response [1]
 
+# ---------------- Project Import Functionality (NEW) ----------------
+
+@app.post("/api/projects/import")
+async def import_project(file: UploadFile = File(...)):
+    """Import project from uploaded JSON file"""
+    
+    # Validate file type
+    if not file.filename.endswith('.json'):
+        raise HTTPException(status_code=400, detail="Only JSON files are supported")
+    
+    # Check file size (10MB limit)
+    if file.size and file.size > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File size must be less than 10MB")
+    
+    try:
+        # Read and parse the uploaded file
+        content = await file.read()
+        project_data = json.loads(content.decode('utf-8'))
+        
+        # Validate against project schema
+        project_schema = load_project_schema()
+        validate(instance=project_data, schema=project_schema)
+        
+        return {
+            "status": "success",
+            "project": project_data,
+            "filename": file.filename
+        }
+        
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON file format")
+    except ValidationError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid project structure: {e.message}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+
+@app.post("/api/projects/validate")
+def validate_project(project_data: Dict[str, Any]):
+    """Validate project data against schema"""
+    try:
+        project_schema = load_project_schema()
+        validate(instance=project_data, schema=project_schema)
+        return {"status": "valid"}
+    except ValidationError as e:
+        raise HTTPException(status_code=400, detail=f"Validation error: {e.message}")
+
+def load_project_schema():
+    """Extract project schema definition from main schema"""
+    if not os.path.exists(SCHEMA_PATH):
+        raise HTTPException(status_code=500, detail="Schema file not found")
+    
+    with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
+        main_schema = json.load(f)
+    
+    # Extract the project definition from the main schema
+    project_def = main_schema.get("definitions", {}).get("project", {})
+    
+    if not project_def:
+        raise HTTPException(status_code=500, detail="Project schema definition not found")
+    
+    return {
+        "type": "object",
+        "properties": project_def.get("properties", {}),
+        "required": project_def.get("required", []),
+        "additionalProperties": project_def.get("additionalProperties", False)
+    }
+
 # ---------------- Blog preview/normalize (Open Graph) ----------------
+
 # Cache: { url: (expires_epoch, data) }
 BLOG_CACHE: Dict[str, Tuple[float, Dict[str, Any]]] = {}  # expiry + data tuple [1]
 DEFAULT_TTL_SECONDS = 15 * 60  # 15 minutes default [1]
@@ -166,14 +240,17 @@ def fetch_preview(url: str) -> Dict[str, Any]:
     if r.status_code >= 400:
         log.warning("Preview fetch failed %s for %s", r.status_code, url)
         raise HTTPException(status_code=502, detail=f"Upstream error {r.status_code}")
+    
     # Prefer lxml if installed; fall back to html.parser for portability
     try:
         soup = BeautifulSoup(r.text, "lxml")
     except Exception:
         soup = BeautifulSoup(r.text, "html.parser")
+    
     og = _parse_og(soup, url)
     summary = og["description"] or _first_paragraph(soup)
     read_minutes = _estimate_read_minutes(summary)
+    
     return {
         "url": url,
         "title": og["title"] or url,
@@ -191,12 +268,14 @@ def blog_preview(url: str = Query(..., min_length=10)):
     cached = BLOG_CACHE.get(url)
     if cached and cached[0] > now:
         return cached[1]  # return cached data while fresh
+    
     try:
         data = fetch_preview(url)
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Preview fetch failed: {e}")
+    
     BLOG_CACHE[url] = (now + DEFAULT_TTL_SECONDS, data)
     return data  # preview result [11]
 
@@ -242,6 +321,6 @@ def clear_blog_cache():
     return {"cleared": count}  # simple cache clear utility [1]
 
 # ---------------- Main ----------------
-if "__main__" == __name__:
+if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)  # development server [1]
