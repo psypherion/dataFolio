@@ -18,8 +18,8 @@ A comprehensive, JSON-driven platform for creating and managing professional por
 ### Clone the repository
 
 ```
-git clone https://github.com/yourusername/portfolio-builder.git
-cd portfolio-builder
+git clone https://github.com/yourusername/dataFolio.git
+cd dataFolio
 ```
 
 ### Set up Python environment
@@ -42,7 +42,7 @@ pip install -r requirements.txt
 ### Start the development server
 
 ```
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app/main:app --reload --host 0.0.0.0 --port 8000
 
 ```
 
@@ -98,7 +98,7 @@ This project uses dual licensing to balance open source community benefits with 
 
 ### Community Support 
 - **[GitHub Issues](../../issues)** - Bug reports and feature requests
-- **[GitHub Discussions](../../discussions)** - Community Q&A and ideas
+- **[GitHub Discussions](../)** - Community Q&A and ideas
 - **[Documentation](./docs)** - Comprehensive guides and references
 
 ## ⭐ Show Your Support
